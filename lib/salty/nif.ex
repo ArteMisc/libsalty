@@ -42,9 +42,9 @@ defmodule Salty.Nif do
   def auth_hmacsha256_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def auth_hmacsha256(_,_), do: :erlang.exit(:salty_nif_not_loaded)
   def auth_hmacsha256_verify(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
-  #def auth_hmacsha256_init(_), do: :erlang.exit(:salty_nif_not_loaded)
-  #def auth_hmacsha256_update(_,_), do: :erlang.exit(:salty_nif_not_loaded)
-  #def auth_hmacsha256_final(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha256_init(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha256_update(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha256_final(_), do: :erlang.exit(:salty_nif_not_loaded)
 
   def auth_hmacsha512_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def auth_hmacsha512_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)

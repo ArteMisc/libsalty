@@ -333,6 +333,35 @@ SALTY_FUNC(auth_hmacsha256_verify, 3) DO
             atom_error_no_match);
 END_OK;
 
+SALTY_FUNC(auth_hmacsha256_init, 1) DO
+    SALTY_INPUT_BIN(0, key, SALTY_BIN_NO_SIZE);
+
+    SALTY_OUTPUT_BIN(state, crypto_auth_hmacsha256_statebytes());
+
+    SALTY_CALL(crypto_auth_hmacsha256_init(
+                (crypto_auth_hmacsha256_state *) state.data,
+                key.data, key.size), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(auth_hmacsha256_update, 2) DO
+    SALTY_INPUT_BIN(0, state, crypto_auth_hmacsha256_statebytes());
+    SALTY_INPUT_BIN(1, input, SALTY_BIN_NO_SIZE);
+
+    SALTY_CALL(crypto_auth_hmacsha256_update(
+                (crypto_auth_hmacsha256_state *) state.data,
+                input.data, input.size), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(auth_hmacsha256_final, 1) DO
+    SALTY_INPUT_BIN(0, state, crypto_auth_hmacsha256_statebytes());
+
+    SALTY_OUTPUT_BIN(hash, crypto_auth_hmacsha256_BYTES);
+
+    SALTY_CALL(crypto_auth_hmacsha256_final(
+                (crypto_auth_hmacsha256_state *) state.data,
+                hash.data), hash);
+END_OK_WITH(hash);
+
 /**
  * AUTH hmacsha512
  */
@@ -482,16 +511,25 @@ salty_exports[] = {
     SALTY_EXPORT_CONS(auth_hmacsha256_KEYBYTES, 0),
     SALTY_EXPORT_FUNC(auth_hmacsha256, 2),
     SALTY_EXPORT_FUNC(auth_hmacsha256_verify, 3),
+    SALTY_EXPORT_FUNC(auth_hmacsha256_init, 1),
+    SALTY_EXPORT_FUNC(auth_hmacsha256_update, 2),
+    SALTY_EXPORT_FUNC(auth_hmacsha256_final, 1),
 
     SALTY_EXPORT_CONS(auth_hmacsha512_BYTES, 0),
     SALTY_EXPORT_CONS(auth_hmacsha512_KEYBYTES, 0),
     SALTY_EXPORT_FUNC(auth_hmacsha512, 2),
     SALTY_EXPORT_FUNC(auth_hmacsha512_verify, 3),
+    //SALTY_EXPORT_FUNC(auth_hmacsha512_init, 1),
+    //SALTY_EXPORT_FUNC(auth_hmacsha512_update, 2),
+    //SALTY_EXPORT_FUNC(auth_hmacsha512_final, 1),
 
     SALTY_EXPORT_CONS(auth_hmacsha512256_BYTES, 0),
     SALTY_EXPORT_CONS(auth_hmacsha512256_KEYBYTES, 0),
     SALTY_EXPORT_FUNC(auth_hmacsha512256, 2),
     SALTY_EXPORT_FUNC(auth_hmacsha512256_verify, 3),
+    //SALTY_EXPORT_FUNC(auth_hmacsha512256_init, 1),
+    //SALTY_EXPORT_FUNC(auth_hmacsha512256_update, 2),
+    //SALTY_EXPORT_FUNC(auth_hmacsha512256_final, 1),
 
     SALTY_EXPORT_FUNC(core_hchacha20, 3),
     SALTY_EXPORT_FUNC(core_hsalsa20, 3),

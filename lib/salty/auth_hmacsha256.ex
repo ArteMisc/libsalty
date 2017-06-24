@@ -1,4 +1,5 @@
 defmodule Salty.Auth.Hmacsha256 do
+  #@behaviour Salty.Multipart.Spec
 
   alias Salty.Nif, as: Nif
 
@@ -8,4 +9,22 @@ defmodule Salty.Auth.Hmacsha256 do
   def auth(data, key), do: Nif.auth_hmacsha256(data, key)
   def verify(mac, data, key), do: Nif.auth_hmacsha256_verify(mac, data, key)
 
+  def init(key) do
+    Nif.auth_hmacsha256_init(key)
+  end
+
+  def update(state, input) do
+    Nif.auth_hmacsha256_update(state, input)
+  end
+
+  def final(state) do
+    Nif.auth_hmacsha256_final(state)
+  end
+
+  def final_verify(state, expected) do
+    case Nif.auth_hmacsha256_final(state) do
+      {:ok, result} -> Nif.memcmp(result, expected)
+      {:error, error} -> {:error, error}
+    end
+  end
 end
