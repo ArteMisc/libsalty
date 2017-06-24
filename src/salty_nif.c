@@ -48,70 +48,88 @@
 #define SALTY_OK_TRIPLET(a, b) enif_make_tuple3(env, atom_ok, a, b)
 
 #define SALTY_BIN_NO_SIZE 0
-#define SALTY_INPUT_BIN(index, dst, len) \
-    ErlNifBinary dst; \
-    if (!enif_inspect_binary(env, argv[index], &dst)) { \
-        if (!enif_inspect_iolist_as_binary(env, argv[index], &dst)) { \
-            return (SALTY_BADARG); \
-        } \
-    } \
-    if (dst.size < len) { \
-        return (SALTY_BADARG); \
+#define SALTY_INPUT_UINT64(index, dst)                                          \
+    ErlNifUInt64 dst;                                                           \
+    if (!enif_get_uint64(env, argv[index], &dst)) {                             \
+        return (SALTY_BADARG);                                                  \
+    }
+
+#define SALTY_INPUT_BIN(index, dst, len)                                        \
+    ErlNifBinary dst;                                                           \
+    if (!enif_inspect_binary(env, argv[index], &dst)) {                         \
+        if (!enif_inspect_iolist_as_binary(env, argv[index], &dst)) {           \
+            return (SALTY_BADARG);                                              \
+        }                                                                       \
+    }                                                                           \
+    if (dst.size < len) {                                                       \
+        return (SALTY_BADARG);                                                  \
     }
 
 /* TODO implement this macro */
 #define SALTY_INPUT_RES(index, dst) \
     ErlNifResourceType
 
-#define SALTY_OUTPUT_BIN(dst, len) \
-    ErlNifBinary dst; \
-    if (!enif_alloc_binary(len, &dst)) { \
-        return (SALTY_BADALLOC); \
+#define SALTY_OUTPUT_BIN(dst, len)                                              \
+    ErlNifBinary dst;                                                           \
+    if (!enif_alloc_binary(len, &dst)) {                                        \
+        return (SALTY_BADALLOC);                                                \
     }
 
 #define OUT(a) enif_make_binary(env, &a)
-#define SALTY_FUNC(name, args) \
-    static ERL_NIF_TERM \
-    salty_##name (ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) { \
-        if (argc != args) { \
-            return (SALTY_BADARG); \
+#define SALTY_FUNC(name, args)                                                  \
+    static ERL_NIF_TERM                                                         \
+    salty_##name (ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {        \
+        if (argc != args) {                                                     \
+            return (SALTY_BADARG);                                              \
         }
 #define DO
 #define END }
 #define END_OK return (SALTY_OK); END
 #define END_OK_WITH(out) return (SALTY_OK_PAIR(OUT(out))); END
 
-#define SALTY_CONST_INT64(name) \
-    static ERL_NIF_TERM \
-    salty_##name (ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) { \
-        return enif_make_int64(env, crypto_##name); \
+#define SALTY_CONST_INT64(constant)                                             \
+    static ERL_NIF_TERM                                                         \
+    salty_##constant (ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {    \
+        return enif_make_uint64(env, crypto_##constant);                        \
+    }
+#define SALTY_CONST_INT64_NOPREFIX(constant)                                    \
+    static ERL_NIF_TERM                                                         \
+    salty_##constant (ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {    \
+        return enif_make_uint64(env, constant);                                 \
     }
 
 #define SALTY_EXPORT_NAME(name) #name
+#define SALTY_EXPORT_CONS(name, args) { SALTY_EXPORT_NAME(name), args, salty_##name }
 #define SALTY_EXPORT_FUNC(name, args) { SALTY_EXPORT_NAME(name), args, salty_##name }
 #define SALTY_EXPORT_FUNC_DIRTY(name, args) { SALTY_EXPORT_NAME(name), args, salty_##name, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 
-#define SALTY_CALL_SIMPLE(call) \
-    if (( call ) != SALTY_NOERR) { \
-        return (SALTY_ERROR); \
+#define SALTY_CALL_SIMPLE(call)                                                 \
+    if (( call ) != SALTY_NOERR) {                                              \
+        return (SALTY_ERROR);                                                   \
     }
 
-#define SALTY_CALL_SIMPLE_WITHERR(call, error) \
-    if (( call ) != SALTY_NOERR) { \
-        return (SALTY_ERROR_PAIR(error)); \
+#define SALTY_CALL_SIMPLE_WITHERR(call, error)                                  \
+    if (( call ) != SALTY_NOERR) {                                              \
+        return (SALTY_ERROR_PAIR(error));                                       \
     }
 
-#define SALTY_CALL(call, output) \
-    if (( call ) != SALTY_NOERR) { \
-        enif_release_binary(&output); \
-        return (SALTY_ERROR); \
+#define SALTY_CALL(call, output)                                                \
+    if (( call ) != SALTY_NOERR) {                                              \
+        enif_release_binary(&output);                                           \
+        return (SALTY_ERROR);                                                   \
     }
 
-#define SALTY_CALL_WITHERR(call, error, output) \
-    if (( call ) != SALTY_NOERR) { \
-        enif_release_binary(&output); \
-        return (SALTY_ERROR_PAIR(error)); \
+#define SALTY_CALL_WITHERR(call, error, output)                                 \
+    if (( call ) != SALTY_NOERR) {                                              \
+        enif_release_binary(&output);                                           \
+        return (SALTY_ERROR_PAIR(error));                                       \
     }
+
+/**
+ * !FIX for randombytes_SEEDBYTES
+ **/
+#define crypto_randombytes_SEEDBYTES randombytes_seedbytes()
+#undef randombytes_SEEDBYTES
 
 /* STATIC VALUES */
 ERL_NIF_TERM atom_ok;
@@ -153,7 +171,7 @@ salty_onload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info) {
 /* sodium_init */
 SALTY_FUNC(init, 0) DO
     SALTY_CALL_SIMPLE(sodium_init());
-END_OK
+END_OK;
 
 /* sodium_memcmp */
 SALTY_FUNC(memcmp, 2) DO
@@ -165,7 +183,7 @@ SALTY_FUNC(memcmp, 2) DO
     }
 
     SALTY_CALL_SIMPLE(sodium_memcmp(a.data, b.data, a.size));
-END_OK
+END_OK;
 
 /* safe key-gen (using locked memory binary resource) */
 
@@ -181,7 +199,7 @@ SALTY_FUNC(aead_aes256gcm_is_available, 0) DO
     if (crypto_aead_aes256gcm_is_available() == 0) {
         return (SALTY_ERROR_PAIR(atom_error_not_available));
     }
-END_OK
+END_OK;
 
 
 SALTY_FUNC(aead_aes256gcm_encrypt, 5) DO
@@ -196,7 +214,7 @@ SALTY_FUNC(aead_aes256gcm_encrypt, 5) DO
     SALTY_CALL(crypto_aead_aes256gcm_encrypt(
                 cipher.data, NULL, plain.data, plain.size, ad.data, ad.size,
                 NULL, npub.data, key.data), cipher);
-END_OK_WITH(cipher)
+END_OK_WITH(cipher);
 
 SALTY_FUNC(aead_aes256gcm_decrypt_detached, 6) DO
     /*SALTY_INPUT_BIN(0, nsec,   crypto_aead_aes256gcm_NSECBYTES);*/
@@ -212,7 +230,7 @@ SALTY_FUNC(aead_aes256gcm_decrypt_detached, 6) DO
                 plain.data, NULL, cipher.data, cipher.size, mac.data,
                 ad.data, ad.size, npub.data, key.data),
                 atom_error_forged, plain);
-END_OK_WITH(plain)
+END_OK_WITH(plain);
 
 /**
  * AEAD chacha20poly1305
@@ -234,7 +252,7 @@ SALTY_FUNC(aead_chacha20poly1305_encrypt, 5) DO
     SALTY_CALL(crypto_aead_chacha20poly1305_encrypt(
                 cipher.data, NULL, plain.data, plain.size, ad.data, ad.size,
                 NULL, npub.data, key.data), cipher);
-END_OK_WITH(cipher)
+END_OK_WITH(cipher);
 
 SALTY_FUNC(aead_chacha20poly1305_decrypt_detached, 6) DO
     /*SALTY_INPUT_BIN(0, nsec,   crypto_aead_chacha20poly1305_NSECBYTES);*/
@@ -250,7 +268,7 @@ SALTY_FUNC(aead_chacha20poly1305_decrypt_detached, 6) DO
                 plain.data, NULL, cipher.data, cipher.size, mac.data,
                 ad.data, ad.size, npub.data, key.data),
                 atom_error_forged, plain);
-END_OK_WITH(plain)
+END_OK_WITH(plain);
 
 /**
  * AEAD xchacha20poly1305_ietf
@@ -272,7 +290,7 @@ SALTY_FUNC(aead_xchacha20poly1305_ietf_encrypt, 5) DO
     SALTY_CALL(crypto_aead_xchacha20poly1305_ietf_encrypt(
                 cipher.data, NULL, plain.data, plain.size, ad.data, ad.size,
                 NULL, npub.data, key.data), cipher);
-END_OK_WITH(cipher)
+END_OK_WITH(cipher);
 
 SALTY_FUNC(aead_xchacha20poly1305_ietf_decrypt_detached, 6) DO
     /*SALTY_INPUT_BIN(0, nsec,   crypto_aead_xchacha20poly1305_ietf_NSECBYTES);*/
@@ -288,7 +306,7 @@ SALTY_FUNC(aead_xchacha20poly1305_ietf_decrypt_detached, 6) DO
                 plain.data, NULL, cipher.data, cipher.size, mac.data,
                 ad.data, ad.size, npub.data, key.data),
                 atom_error_forged, plain);
-END_OK_WITH(plain)
+END_OK_WITH(plain);
 
 /**
  * AUTH hmacsha256
@@ -313,7 +331,7 @@ SALTY_FUNC(auth_hmacsha256_verify, 3) DO
     SALTY_CALL_SIMPLE_WITHERR(crypto_auth_hmacsha256_verify(
                 mac.data, msg.data, msg.size, key.data),
             atom_error_no_match);
-END_OK
+END_OK;
 
 /**
  * AUTH hmacsha512
@@ -338,7 +356,7 @@ SALTY_FUNC(auth_hmacsha512_verify, 3) DO
     SALTY_CALL_SIMPLE_WITHERR(crypto_auth_hmacsha512_verify(
                 mac.data, msg.data, msg.size, key.data),
             atom_error_no_match);
-END_OK
+END_OK;
 
 /**
  * AUTH hmacsha512256
@@ -353,7 +371,7 @@ SALTY_FUNC(auth_hmacsha512256, 2) DO
     SALTY_OUTPUT_BIN(mac, crypto_auth_hmacsha512256_BYTES);
 
     SALTY_CALL(crypto_auth_hmacsha512256(mac.data, msg.data, msg.size, key.data), mac);
-END_OK_WITH(mac)
+END_OK_WITH(mac);
 
 SALTY_FUNC(auth_hmacsha512256_verify, 3) DO
     SALTY_INPUT_BIN(0, mac, crypto_auth_hmacsha512256_BYTES);
@@ -363,7 +381,7 @@ SALTY_FUNC(auth_hmacsha512256_verify, 3) DO
     SALTY_CALL_SIMPLE_WITHERR(crypto_auth_hmacsha512256_verify(
                 mac.data, msg.data, msg.size, key.data),
             atom_error_no_match);
-END_OK
+END_OK;
 
 /**
  * CORE hchacha20
@@ -376,7 +394,7 @@ SALTY_FUNC(core_hchacha20, 3) DO
     SALTY_OUTPUT_BIN(out, crypto_core_hchacha20_OUTPUTBYTES);
 
     SALTY_CALL(crypto_core_hchacha20(out.data, in.data, key.data, con.data), out);
-END_OK_WITH(out)
+END_OK_WITH(out);
 /**
  * CORE hsalsa20
  */
@@ -388,8 +406,46 @@ SALTY_FUNC(core_hsalsa20, 3) DO
     SALTY_OUTPUT_BIN(out, crypto_core_hsalsa20_OUTPUTBYTES);
 
     SALTY_CALL(crypto_core_hsalsa20(out.data, in.data, key.data, con.data), out);
-END_OK_WITH(out)
+END_OK_WITH(out);
 
+/**
+ * RANDOMBYTES
+ */
+SALTY_CONST_INT64(randombytes_SEEDBYTES);
+
+SALTY_FUNC(randombytes_random, 0) DO
+    return enif_make_uint64(env, randombytes_random());
+END;
+
+SALTY_FUNC(randombytes_stir, 0) DO
+    randombytes_stir();
+END_OK;
+
+SALTY_FUNC(randombytes_uniform, 1) DO
+    SALTY_INPUT_UINT64(0, upper);
+    return enif_make_ulong(env, randombytes_uniform((uint32_t) (upper & 0xffffffff)));
+END;
+
+SALTY_FUNC(randombytes_buf, 1) DO
+    SALTY_INPUT_UINT64(0, len);
+
+    SALTY_OUTPUT_BIN(buff, len);
+
+    randombytes_buf(buff.data, len);
+END_OK_WITH(buff);
+
+SALTY_FUNC(randombytes_buf_deterministic, 2) DO
+    SALTY_INPUT_UINT64(0, outlen);
+    SALTY_INPUT_BIN(1, seed, crypto_randombytes_SEEDBYTES);
+
+    SALTY_OUTPUT_BIN(buff, outlen);
+
+    randombytes_buf_deterministic(buff.data, outlen, seed.data);
+END_OK_WITH(buff);
+
+SALTY_FUNC(randombytes_close, 0) DO
+    SALTY_CALL_SIMPLE(randombytes_close());
+END_OK;
 
 /***********************************************
  * export
@@ -400,45 +456,53 @@ salty_exports[] = {
     SALTY_EXPORT_FUNC(init, 0),
     SALTY_EXPORT_FUNC(memcmp, 2),
 
-    SALTY_EXPORT_FUNC(aead_aes256gcm_KEYBYTES, 0),
-    SALTY_EXPORT_FUNC(aead_aes256gcm_NSECBYTES, 0),
-    SALTY_EXPORT_FUNC(aead_aes256gcm_NPUBBYTES, 0),
-    SALTY_EXPORT_FUNC(aead_aes256gcm_ABYTES, 0),
+    SALTY_EXPORT_CONS(aead_aes256gcm_KEYBYTES, 0),
+    SALTY_EXPORT_CONS(aead_aes256gcm_NSECBYTES, 0),
+    SALTY_EXPORT_CONS(aead_aes256gcm_NPUBBYTES, 0),
+    SALTY_EXPORT_CONS(aead_aes256gcm_ABYTES, 0),
     SALTY_EXPORT_FUNC(aead_aes256gcm_is_available, 0),
     SALTY_EXPORT_FUNC(aead_aes256gcm_encrypt, 5),
     SALTY_EXPORT_FUNC(aead_aes256gcm_decrypt_detached, 6),
 
-    SALTY_EXPORT_FUNC(aead_chacha20poly1305_KEYBYTES, 0),
-    SALTY_EXPORT_FUNC(aead_chacha20poly1305_NSECBYTES, 0),
-    SALTY_EXPORT_FUNC(aead_chacha20poly1305_NPUBBYTES, 0),
-    SALTY_EXPORT_FUNC(aead_chacha20poly1305_ABYTES, 0),
+    SALTY_EXPORT_CONS(aead_chacha20poly1305_KEYBYTES, 0),
+    SALTY_EXPORT_CONS(aead_chacha20poly1305_NSECBYTES, 0),
+    SALTY_EXPORT_CONS(aead_chacha20poly1305_NPUBBYTES, 0),
+    SALTY_EXPORT_CONS(aead_chacha20poly1305_ABYTES, 0),
     SALTY_EXPORT_FUNC(aead_chacha20poly1305_encrypt, 5),
     SALTY_EXPORT_FUNC(aead_chacha20poly1305_decrypt_detached, 6),
     
-    SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_KEYBYTES, 0),
-    SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_NSECBYTES, 0),
-    SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_NPUBBYTES, 0),
-    SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_ABYTES, 0),
+    SALTY_EXPORT_CONS(aead_xchacha20poly1305_ietf_KEYBYTES, 0),
+    SALTY_EXPORT_CONS(aead_xchacha20poly1305_ietf_NSECBYTES, 0),
+    SALTY_EXPORT_CONS(aead_xchacha20poly1305_ietf_NPUBBYTES, 0),
+    SALTY_EXPORT_CONS(aead_xchacha20poly1305_ietf_ABYTES, 0),
     SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_encrypt, 5),
     SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_decrypt_detached, 6),
 
-    SALTY_EXPORT_FUNC(auth_hmacsha256_BYTES, 0),
-    SALTY_EXPORT_FUNC(auth_hmacsha256_KEYBYTES, 0),
+    SALTY_EXPORT_CONS(auth_hmacsha256_BYTES, 0),
+    SALTY_EXPORT_CONS(auth_hmacsha256_KEYBYTES, 0),
     SALTY_EXPORT_FUNC(auth_hmacsha256, 2),
     SALTY_EXPORT_FUNC(auth_hmacsha256_verify, 3),
 
-    SALTY_EXPORT_FUNC(auth_hmacsha512_BYTES, 0),
-    SALTY_EXPORT_FUNC(auth_hmacsha512_KEYBYTES, 0),
+    SALTY_EXPORT_CONS(auth_hmacsha512_BYTES, 0),
+    SALTY_EXPORT_CONS(auth_hmacsha512_KEYBYTES, 0),
     SALTY_EXPORT_FUNC(auth_hmacsha512, 2),
     SALTY_EXPORT_FUNC(auth_hmacsha512_verify, 3),
 
-    SALTY_EXPORT_FUNC(auth_hmacsha512256_BYTES, 0),
-    SALTY_EXPORT_FUNC(auth_hmacsha512256_KEYBYTES, 0),
+    SALTY_EXPORT_CONS(auth_hmacsha512256_BYTES, 0),
+    SALTY_EXPORT_CONS(auth_hmacsha512256_KEYBYTES, 0),
     SALTY_EXPORT_FUNC(auth_hmacsha512256, 2),
     SALTY_EXPORT_FUNC(auth_hmacsha512256_verify, 3),
 
     SALTY_EXPORT_FUNC(core_hchacha20, 3),
     SALTY_EXPORT_FUNC(core_hsalsa20, 3),
+
+    SALTY_EXPORT_FUNC(randombytes_SEEDBYTES, 0),
+    SALTY_EXPORT_FUNC(randombytes_random, 0),
+    SALTY_EXPORT_FUNC(randombytes_stir, 0),
+    SALTY_EXPORT_FUNC(randombytes_uniform, 1),
+    SALTY_EXPORT_FUNC(randombytes_buf, 1),
+    SALTY_EXPORT_FUNC(randombytes_buf_deterministic, 2),
+    SALTY_EXPORT_FUNC(randombytes_close, 0),
 };
 
 ERL_NIF_INIT(Elixir.Salty.Nif, salty_exports, salty_onload, NULL, NULL, NULL)

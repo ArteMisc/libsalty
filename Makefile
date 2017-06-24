@@ -1,5 +1,5 @@
-#brute forcing through this...
-
+# get information about the compilation environment
+# TODO enable cross compilation
 ERTS_I :=$(shell erl -eval 'io:format("~s~n", [lists:concat([code:root_dir(), "/erts-", erlang:system_info(version), "/include"])])' -s init stop -noshell)
 ERL_I :=$(shell erl -eval 'io:format("~s~n", [lists:concat([code:lib_dir(erl_interface), "/include"])])' -s init stop -noshell)
 ERL_L :=$(shell erl -eval 'io:format("~s~n", [lists:concat([code:lib_dir(erl_interface), "/lib"])])' -s init stop -noshell)
