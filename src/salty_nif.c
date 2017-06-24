@@ -159,10 +159,10 @@ crypto_auth_hmacsha512_final_verify(crypto_auth_hmacsha512_state *state,
 
 int
 crypto_auth_hmacsha512256_final_verify(crypto_auth_hmacsha512256_state *state,
-                                       const unsigned char          *h) {
+                                       const unsigned char             *h) {
     unsigned char correct[32];
 
-    crypto_auth_hmacsha512_final(state, correct);
+    crypto_auth_hmacsha512256_final(state, correct);
 
     return crypto_verify_32(h, correct) | (-(h == correct)) |
            sodium_memcmp(correct, h, 32);

@@ -1,5 +1,5 @@
 defmodule Salty.Auth.Hmacsha256 do
-  #@behaviour Salty.Multipart.Spec
+  @behaviour Salty.Multipart.Spec
 
   alias Salty.Nif, as: Nif
 
