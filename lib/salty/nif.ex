@@ -13,8 +13,6 @@ defmodule Salty.Nif do
     end
   end
 
-  #def func, do: :erlang.exit(:salty_nif_not_loaded)
-
   def init, do: :erlang.exit(:salty_nif_not_loaded)
   def memcmp(_, _), do: :erlang.exit(:salty_nif_not_loaded)
 
@@ -23,6 +21,8 @@ defmodule Salty.Nif do
   def aead_aes256gcm_NPUBBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_aes256gcm_ABYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_aes256gcm_is_available, do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_aes256gcm_encrypt(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_aes256gcm_decrypt_detached(_,_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
   def aead_chacha20poly1305_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_chacha20poly1305_NSECBYTES, do: :erlang.exit(:salty_nif_not_loaded)
@@ -35,9 +35,24 @@ defmodule Salty.Nif do
   def aead_xchacha20poly1305_ietf_NSECBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_xchacha20poly1305_ietf_NPUBBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_xchacha20poly1305_ietf_ABYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_xchacha20poly1305_ietf_encrypt(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_xchacha20poly1305_ietf_decrypt_detached(_,_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
   def auth_hmacsha256_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def auth_hmacsha256_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
-  def auth_hmacsha256(_, _), do: :erlang.exit(:salty_nif_not_loaded)
-  def auth_hmacsha256_verify(_, _, _), do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha256(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha256_verify(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
+  def auth_hmacsha512_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha512_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha512(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha512_verify(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
+  def auth_hmacsha512256_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha512256_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha512256(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def auth_hmacsha512256_verify(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
+  def core_hchacha20(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def core_hsalsa20(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
 end

@@ -69,6 +69,7 @@
         return (SALTY_BADALLOC); \
     }
 
+#define OUT(a) enif_make_binary(env, &a)
 #define SALTY_FUNC(name, args) \
     static ERL_NIF_TERM \
     salty_##name (ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) { \
@@ -78,7 +79,7 @@
 #define DO
 #define END }
 #define END_OK return (SALTY_OK); END
-#define OUT(a) enif_make_binary(env, &a)
+#define END_OK_WITH(out) return (SALTY_OK_PAIR(OUT(out))); END
 
 #define SALTY_CONST_INT64(name) \
     static ERL_NIF_TERM \
@@ -183,6 +184,36 @@ SALTY_FUNC(aead_aes256gcm_is_available, 0) DO
 END_OK
 
 
+SALTY_FUNC(aead_aes256gcm_encrypt, 5) DO
+    SALTY_INPUT_BIN(0, plain, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, ad,    SALTY_BIN_NO_SIZE);
+    /*SALTY_INPUT_BIN(2, nsec,  crypto_aead_aes256gcm_NSECBYTES);*/
+    SALTY_INPUT_BIN(3, npub,  crypto_aead_aes256gcm_NPUBBYTES);
+    SALTY_INPUT_BIN(4, key,   crypto_aead_aes256gcm_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, crypto_aead_aes256gcm_ABYTES + plain.size);
+
+    SALTY_CALL(crypto_aead_aes256gcm_encrypt(
+                cipher.data, NULL, plain.data, plain.size, ad.data, ad.size,
+                NULL, npub.data, key.data), cipher);
+END_OK_WITH(cipher)
+
+SALTY_FUNC(aead_aes256gcm_decrypt_detached, 6) DO
+    /*SALTY_INPUT_BIN(0, nsec,   crypto_aead_aes256gcm_NSECBYTES);*/
+    SALTY_INPUT_BIN(1, cipher, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(2, mac,    crypto_aead_aes256gcm_ABYTES);
+    SALTY_INPUT_BIN(3, ad,     SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(4, npub,   crypto_aead_aes256gcm_NPUBBYTES);
+    SALTY_INPUT_BIN(5, key,    crypto_aead_aes256gcm_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(plain, cipher.size);
+
+    SALTY_CALL_WITHERR(crypto_aead_aes256gcm_decrypt_detached(
+                plain.data, NULL, cipher.data, cipher.size, mac.data,
+                ad.data, ad.size, npub.data, key.data),
+                atom_error_forged, plain);
+END_OK_WITH(plain)
+
 /**
  * AEAD chacha20poly1305
  */
@@ -203,9 +234,7 @@ SALTY_FUNC(aead_chacha20poly1305_encrypt, 5) DO
     SALTY_CALL(crypto_aead_chacha20poly1305_encrypt(
                 cipher.data, NULL, plain.data, plain.size, ad.data, ad.size,
                 NULL, npub.data, key.data), cipher);
-
-    return (SALTY_OK_PAIR(OUT(cipher)));
-END
+END_OK_WITH(cipher)
 
 SALTY_FUNC(aead_chacha20poly1305_decrypt_detached, 6) DO
     /*SALTY_INPUT_BIN(0, nsec,   crypto_aead_chacha20poly1305_NSECBYTES);*/
@@ -221,9 +250,7 @@ SALTY_FUNC(aead_chacha20poly1305_decrypt_detached, 6) DO
                 plain.data, NULL, cipher.data, cipher.size, mac.data,
                 ad.data, ad.size, npub.data, key.data),
                 atom_error_forged, plain);
-
-    return (SALTY_OK_PAIR(OUT(plain)));
-END
+END_OK_WITH(plain)
 
 /**
  * AEAD xchacha20poly1305_ietf
@@ -232,6 +259,36 @@ SALTY_CONST_INT64(aead_xchacha20poly1305_ietf_KEYBYTES);
 SALTY_CONST_INT64(aead_xchacha20poly1305_ietf_NSECBYTES);
 SALTY_CONST_INT64(aead_xchacha20poly1305_ietf_NPUBBYTES);
 SALTY_CONST_INT64(aead_xchacha20poly1305_ietf_ABYTES);
+
+SALTY_FUNC(aead_xchacha20poly1305_ietf_encrypt, 5) DO
+    SALTY_INPUT_BIN(0, plain, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, ad,    SALTY_BIN_NO_SIZE);
+    /*SALTY_INPUT_BIN(2, nsec,  crypto_aead_xchacha20poly1305_ietf_NSECBYTES);*/
+    SALTY_INPUT_BIN(3, npub,  crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
+    SALTY_INPUT_BIN(4, key,   crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, crypto_aead_xchacha20poly1305_ietf_ABYTES + plain.size);
+
+    SALTY_CALL(crypto_aead_xchacha20poly1305_ietf_encrypt(
+                cipher.data, NULL, plain.data, plain.size, ad.data, ad.size,
+                NULL, npub.data, key.data), cipher);
+END_OK_WITH(cipher)
+
+SALTY_FUNC(aead_xchacha20poly1305_ietf_decrypt_detached, 6) DO
+    /*SALTY_INPUT_BIN(0, nsec,   crypto_aead_xchacha20poly1305_ietf_NSECBYTES);*/
+    SALTY_INPUT_BIN(1, cipher, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(2, mac,    crypto_aead_xchacha20poly1305_ietf_ABYTES);
+    SALTY_INPUT_BIN(3, ad,     SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(4, npub,   crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
+    SALTY_INPUT_BIN(5, key,    crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(plain, cipher.size);
+
+    SALTY_CALL_WITHERR(crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
+                plain.data, NULL, cipher.data, cipher.size, mac.data,
+                ad.data, ad.size, npub.data, key.data),
+                atom_error_forged, plain);
+END_OK_WITH(plain)
 
 /**
  * AUTH hmacsha256
@@ -246,9 +303,7 @@ SALTY_FUNC(auth_hmacsha256, 2) DO
     SALTY_OUTPUT_BIN(mac, crypto_auth_hmacsha256_BYTES);
 
     SALTY_CALL(crypto_auth_hmacsha256(mac.data, msg.data, msg.size, key.data), mac);
-
-    return (SALTY_OK_PAIR(OUT(mac)));
-END
+END_OK_WITH(mac);
 
 SALTY_FUNC(auth_hmacsha256_verify, 3) DO
     SALTY_INPUT_BIN(0, mac, crypto_auth_hmacsha256_BYTES);
@@ -261,11 +316,79 @@ SALTY_FUNC(auth_hmacsha256_verify, 3) DO
 END_OK
 
 /**
- * AUTH hmacsha256
+ * AUTH hmacsha512
  */
+SALTY_CONST_INT64(auth_hmacsha512_BYTES);
+SALTY_CONST_INT64(auth_hmacsha512_KEYBYTES);
+
+SALTY_FUNC(auth_hmacsha512, 2) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, key, crypto_auth_hmacsha512_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(mac, crypto_auth_hmacsha512_BYTES);
+
+    SALTY_CALL(crypto_auth_hmacsha512(mac.data, msg.data, msg.size, key.data), mac);
+END_OK_WITH(mac);
+
+SALTY_FUNC(auth_hmacsha512_verify, 3) DO
+    SALTY_INPUT_BIN(0, mac, crypto_auth_hmacsha512_BYTES);
+    SALTY_INPUT_BIN(1, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(2, key, crypto_auth_hmacsha512_KEYBYTES);
+
+    SALTY_CALL_SIMPLE_WITHERR(crypto_auth_hmacsha512_verify(
+                mac.data, msg.data, msg.size, key.data),
+            atom_error_no_match);
+END_OK
+
 /**
- * AUTH hmacsha256
+ * AUTH hmacsha512256
  */
+SALTY_CONST_INT64(auth_hmacsha512256_BYTES);
+SALTY_CONST_INT64(auth_hmacsha512256_KEYBYTES);
+
+SALTY_FUNC(auth_hmacsha512256, 2) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, key, crypto_auth_hmacsha512256_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(mac, crypto_auth_hmacsha512256_BYTES);
+
+    SALTY_CALL(crypto_auth_hmacsha512256(mac.data, msg.data, msg.size, key.data), mac);
+END_OK_WITH(mac)
+
+SALTY_FUNC(auth_hmacsha512256_verify, 3) DO
+    SALTY_INPUT_BIN(0, mac, crypto_auth_hmacsha512256_BYTES);
+    SALTY_INPUT_BIN(1, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(2, key, crypto_auth_hmacsha512256_KEYBYTES);
+
+    SALTY_CALL_SIMPLE_WITHERR(crypto_auth_hmacsha512256_verify(
+                mac.data, msg.data, msg.size, key.data),
+            atom_error_no_match);
+END_OK
+
+/**
+ * CORE hchacha20
+ */
+SALTY_FUNC(core_hchacha20, 3) DO
+    SALTY_INPUT_BIN(0, in, crypto_core_hchacha20_INPUTBYTES);
+    SALTY_INPUT_BIN(1, key, crypto_core_hchacha20_KEYBYTES);
+    SALTY_INPUT_BIN(2, con, crypto_core_hchacha20_CONSTBYTES);
+
+    SALTY_OUTPUT_BIN(out, crypto_core_hchacha20_OUTPUTBYTES);
+
+    SALTY_CALL(crypto_core_hchacha20(out.data, in.data, key.data, con.data), out);
+END_OK_WITH(out)
+/**
+ * CORE hsalsa20
+ */
+SALTY_FUNC(core_hsalsa20, 3) DO
+    SALTY_INPUT_BIN(0, in, crypto_core_hsalsa20_INPUTBYTES);
+    SALTY_INPUT_BIN(1, key, crypto_core_hsalsa20_KEYBYTES);
+    SALTY_INPUT_BIN(2, con, crypto_core_hsalsa20_CONSTBYTES);
+
+    SALTY_OUTPUT_BIN(out, crypto_core_hsalsa20_OUTPUTBYTES);
+
+    SALTY_CALL(crypto_core_hsalsa20(out.data, in.data, key.data, con.data), out);
+END_OK_WITH(out)
 
 
 /***********************************************
@@ -282,6 +405,8 @@ salty_exports[] = {
     SALTY_EXPORT_FUNC(aead_aes256gcm_NPUBBYTES, 0),
     SALTY_EXPORT_FUNC(aead_aes256gcm_ABYTES, 0),
     SALTY_EXPORT_FUNC(aead_aes256gcm_is_available, 0),
+    SALTY_EXPORT_FUNC(aead_aes256gcm_encrypt, 5),
+    SALTY_EXPORT_FUNC(aead_aes256gcm_decrypt_detached, 6),
 
     SALTY_EXPORT_FUNC(aead_chacha20poly1305_KEYBYTES, 0),
     SALTY_EXPORT_FUNC(aead_chacha20poly1305_NSECBYTES, 0),
@@ -294,11 +419,26 @@ salty_exports[] = {
     SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_NSECBYTES, 0),
     SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_NPUBBYTES, 0),
     SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_ABYTES, 0),
+    SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_encrypt, 5),
+    SALTY_EXPORT_FUNC(aead_xchacha20poly1305_ietf_decrypt_detached, 6),
 
     SALTY_EXPORT_FUNC(auth_hmacsha256_BYTES, 0),
     SALTY_EXPORT_FUNC(auth_hmacsha256_KEYBYTES, 0),
     SALTY_EXPORT_FUNC(auth_hmacsha256, 2),
     SALTY_EXPORT_FUNC(auth_hmacsha256_verify, 3),
+
+    SALTY_EXPORT_FUNC(auth_hmacsha512_BYTES, 0),
+    SALTY_EXPORT_FUNC(auth_hmacsha512_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(auth_hmacsha512, 2),
+    SALTY_EXPORT_FUNC(auth_hmacsha512_verify, 3),
+
+    SALTY_EXPORT_FUNC(auth_hmacsha512256_BYTES, 0),
+    SALTY_EXPORT_FUNC(auth_hmacsha512256_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(auth_hmacsha512256, 2),
+    SALTY_EXPORT_FUNC(auth_hmacsha512256_verify, 3),
+
+    SALTY_EXPORT_FUNC(core_hchacha20, 3),
+    SALTY_EXPORT_FUNC(core_hsalsa20, 3),
 };
 
 ERL_NIF_INIT(Elixir.Salty.Nif, salty_exports, salty_onload, NULL, NULL, NULL)
