@@ -7,7 +7,7 @@ defmodule Salty.Auth.Hmacsha512256 do
     Nif.auth_hmacsha512256_BYTES()
   end
 
-  def key_bytes do
+  def keybytes do
     Nif.auth_hmacsha512256_KEYBYTES()
   end
 
