@@ -1,37 +1,22 @@
 defmodule Salty.Auth do
-  @behaviour Salty.Multipart.Spec
-
-  alias Salty.Nif, as: Nif
-
-  def bytes do
-    Nif.auth_hmacsha512256_BYTES()
+  def __using__(_opts) do
+    quote do
+      @behaviour Salty.Multipart.Spec
+      @behaviour Salty.Auth
+    end
   end
 
-  def keybytes do
-    Nif.auth_hmacsha512256_KEYBYTES()
+  def primitive do
+    Salty.Auth.Hmacsha512256
   end
 
-  def auth(data, key) do
-    Nif.auth_hmacsha512256(data, key)
-  end
+  @callback bytes() :: non_neg_integer()
 
-  def verify(mac, data, key) do
-    Nif.auth_hmacsha512256_verify(mac, data, key)
-  end
+  @callback keybytes() :: non_neg_integer()
 
-  def init(key) do
-    Nif.auth_hmacsha512256_init(key)
-  end
+  @callback auth(binary(), binary()) :: {:ok, binary()} | {:error, any()}
 
-  def update(state, input) do
-    Nif.auth_hmacsha512256_update(state, input)
-  end
+  @callback verify(binary(), binary(), binary()) :: :ok | {:error, any()}
 
-  def final(state) do
-    Nif.auth_hmacsha512256_final(state)
-  end
-
-  def final_verify(state, expected) do
-    Nif.auth_hmacsha512256_final_verify(state, expected)
-  end
+  @callback init(binary()) :: {:ok, binary()} | {:error, any()}
 end

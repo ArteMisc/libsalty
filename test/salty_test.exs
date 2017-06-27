@@ -6,18 +6,20 @@ defmodule SaltyTest do
   alias Salty.Random, as: Rand
 
   test "auth" do
+    prim = Salty.Auth.primitive()
+
     input = <<"test input">>
-    {:ok, key} = Rand.buf(Salty.Auth.keybytes())
+    {:ok, key} = Rand.buf(prim.keybytes())
 
-    {:ok, auth} = Salty.Auth.auth(input, key)
-    :ok = Salty.Auth.verify(auth, input, key)
+    {:ok, auth} = prim.auth(input, key)
+    :ok = prim.verify(auth, input, key)
 
-    {:ok, auth_multi} = Salty.Auth
+    {:ok, auth_multi} = prim
                         |> Multi.init(key)
                         |> Multi.update(input)
                         |> Multi.final()
 
-    :ok = Salty.Auth
+    :ok = prim
           |> Multi.init(key)
           |> Multi.update(input)
           |> Multi.final_verify(auth_multi)
