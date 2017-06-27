@@ -1,8 +1,9 @@
 defmodule Salty.Generichash do
-  def __using__(_opts) do
+  defmacro __using__(_opts) do
     quote do
       #@behaviour Salty.Multipart.Spec
-      @behaviour Salty.GenericHash
+      @behaviour Salty.Generichash
+      alias Salty.Nif, as: C
     end
   end
 
@@ -24,7 +25,7 @@ defmodule Salty.Generichash do
 
   @callback hash(binary(), binary(), binary()) :: {:ok, binary()} | {:error, any()}
 
-  @callback init(binary(), binary(), non_neg_integer()) :: {:ok, binary()} | {:error, any()}
+  @callback init(binary(), non_neg_integer()) :: {:ok, binary()} | {:error, any()}
 
   @callback update(binary(), binary()) :: {:ok, binary()} | {:error, any()}
 

@@ -1,6 +1,5 @@
 defmodule Salty.Auth.Hmacsha512256 do
   use Salty.Auth
-  alias Salty.Nif, as: C
 
   def bytes do
     C.auth_hmacsha512256_BYTES()

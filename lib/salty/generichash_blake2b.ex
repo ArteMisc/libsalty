@@ -1,6 +1,5 @@
 defmodule Salty.Generichash.Blake2b do
   use Salty.Generichash
-  alias Salty.Nif, as: C
 
   def bytes_min do
     C.generichash_blake2b_BYTES_MIN()
