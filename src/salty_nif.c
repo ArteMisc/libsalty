@@ -218,6 +218,16 @@ crypto_hash_sha512_final_verify(crypto_hash_sha512_state *state,
            sodium_memcmp(correct, h, 64);
 }
 
+int
+crypto_onetimeauth_poly1305_final_verify(crypto_onetimeauth_poly1305_state *state,
+                                         const unsigned char               *h) {
+    unsigned char correct[16];
+
+    crypto_onetimeauth_poly1305_final(state, correct);
+
+    return crypto_verify_16(h, correct);
+}
+
 /* STATIC VALUES */
 ERL_NIF_TERM atom_ok;
 ERL_NIF_TERM atom_error;
@@ -810,6 +820,69 @@ SALTY_FUNC(hash_sha512_final_verify, 2) DO
 END_OK;
 
 /**
+ * ONETIMEAUTH Poly1305
+ */
+SALTY_CONST_INT64(onetimeauth_poly1305_BYTES);
+SALTY_CONST_INT64(onetimeauth_poly1305_KEYBYTES);
+
+SALTY_FUNC(onetimeauth_poly1305, 2) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, key, crypto_onetimeauth_poly1305_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(mac, crypto_onetimeauth_poly1305_BYTES);
+
+    SALTY_CALL(crypto_onetimeauth_poly1305(mac.data, msg.data, msg.size, key.data), mac);
+END_OK_WITH(mac);
+
+SALTY_FUNC(onetimeauth_poly1305_verify, 3) DO
+    SALTY_INPUT_BIN(0, mac, crypto_onetimeauth_poly1305_BYTES);
+    SALTY_INPUT_BIN(1, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(2, key, crypto_onetimeauth_poly1305_KEYBYTES);
+
+    SALTY_CALL_SIMPLE_WITHERR(crypto_onetimeauth_poly1305_verify(
+                mac.data, msg.data, msg.size, key.data),
+            atom_error_no_match);
+END_OK;
+
+SALTY_FUNC(onetimeauth_poly1305_init, 1) DO
+    SALTY_INPUT_BIN(0, key, crypto_onetimeauth_poly1305_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(state, crypto_onetimeauth_poly1305_statebytes());
+
+    SALTY_CALL(crypto_onetimeauth_poly1305_init(
+                (crypto_onetimeauth_poly1305_state *) state.data,
+                key.data), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(onetimeauth_poly1305_update, 2) DO
+    SALTY_INPUT_BIN(0, state, crypto_onetimeauth_poly1305_statebytes());
+    SALTY_INPUT_BIN(1, input, SALTY_BIN_NO_SIZE);
+
+    SALTY_CALL(crypto_onetimeauth_poly1305_update(
+                (crypto_onetimeauth_poly1305_state *) state.data,
+                input.data, input.size), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(onetimeauth_poly1305_final, 1) DO
+    SALTY_INPUT_BIN(0, state, crypto_onetimeauth_poly1305_statebytes());
+
+    SALTY_OUTPUT_BIN(hash, crypto_onetimeauth_poly1305_BYTES);
+
+    SALTY_CALL(crypto_onetimeauth_poly1305_final(
+                (crypto_onetimeauth_poly1305_state *) state.data,
+                hash.data), hash);
+END_OK_WITH(hash);
+
+SALTY_FUNC(onetimeauth_poly1305_final_verify, 2) DO
+    SALTY_INPUT_BIN(0, state, crypto_onetimeauth_poly1305_statebytes());
+    SALTY_INPUT_BIN(1, expect, crypto_onetimeauth_poly1305_BYTES);
+
+    SALTY_CALL_SIMPLE_WITHERR(crypto_onetimeauth_poly1305_final_verify(
+                (crypto_onetimeauth_poly1305_state *) state.data, expect.data),
+            atom_error_forged);
+END_OK;
+
+/**
  * RANDOMBYTES
  */
 SALTY_CONST_INT64(randombytes_SEEDBYTES);
@@ -939,6 +1012,15 @@ salty_exports[] = {
     SALTY_EXPORT_FUNC(hash_sha512_update, 2),
     SALTY_EXPORT_FUNC(hash_sha512_final, 1),
     SALTY_EXPORT_FUNC(hash_sha512_final_verify, 2),
+
+    SALTY_EXPORT_CONS(onetimeauth_poly1305_BYTES, 0),
+    SALTY_EXPORT_CONS(onetimeauth_poly1305_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(onetimeauth_poly1305, 2),
+    SALTY_EXPORT_FUNC(onetimeauth_poly1305_verify, 3),
+    SALTY_EXPORT_FUNC(onetimeauth_poly1305_init, 1),
+    SALTY_EXPORT_FUNC(onetimeauth_poly1305_update, 2),
+    SALTY_EXPORT_FUNC(onetimeauth_poly1305_final, 1),
+    SALTY_EXPORT_FUNC(onetimeauth_poly1305_final_verify, 2),
 
     SALTY_EXPORT_FUNC(randombytes_SEEDBYTES, 0),
     SALTY_EXPORT_FUNC(randombytes_random, 0),

@@ -79,4 +79,44 @@ defmodule SaltyTest do
           |> Multi.update(input)
           |> Multi.final_verify(auth_multi)
   end
+
+  test "onetimeauth" do
+    prim = Salty.Onetimeauth.primitive()
+
+    input = <<"test input">>
+    {:ok, key} = Rand.buf(prim.keybytes())
+
+    {:ok, auth} = prim.auth(input, key)
+    :ok = prim.verify(auth, input, key)
+
+    {:ok, auth_multi} = prim
+                        |> Multi.init(key)
+                        |> Multi.update(input)
+                        |> Multi.final()
+
+    :ok = prim
+          |> Multi.init(key)
+          |> Multi.update(input)
+          |> Multi.final_verify(auth_multi)
+  end
+
+  test "onetimeauth_poly1305" do
+    input = <<"test input">>
+
+    {:ok, key} = Rand.buf(Salty.Onetimeauth.Poly1305.keybytes())
+
+    {:ok, auth} = Salty.Onetimeauth.Poly1305.auth(input, key)
+    :ok = Salty.Onetimeauth.Poly1305.verify(auth, input, key)
+
+    {:ok, auth_multi} = Salty.Onetimeauth.Poly1305
+                        |> Multi.init(key)
+                        |> Multi.update(input)
+                        |> Multi.final()
+
+    :ok = Salty.Onetimeauth.Poly1305
+          |> Multi.init(key)
+          |> Multi.update(input)
+          |> Multi.final_verify(auth_multi)
+  end
+
 end

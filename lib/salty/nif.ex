@@ -99,6 +99,15 @@ defmodule Salty.Nif do
   def hash_sha512_final(_), do: :erlang.exit(:salty_nif_not_loaded)
   def hash_sha512_final_verify(_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
+  def onetimeauth_poly1305_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def onetimeauth_poly1305_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def onetimeauth_poly1305(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def onetimeauth_poly1305_verify(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def onetimeauth_poly1305_init(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def onetimeauth_poly1305_update(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def onetimeauth_poly1305_final(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def onetimeauth_poly1305_final_verify(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
   def randombytes_SEEDBYTES(), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_random(), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_stir(), do: :erlang.exit(:salty_nif_not_loaded)
