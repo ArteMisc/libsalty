@@ -172,6 +172,52 @@ crypto_auth_hmacsha512256_final_verify(crypto_auth_hmacsha512256_state *state,
            sodium_memcmp(correct, h, 32);
 }
 
+int
+crypto_hash_sha256_verify(const unsigned char *h,
+                          const unsigned char *in,
+                          unsigned long long  inlen) {
+    unsigned char correct[32];
+
+    crypto_hash_sha256(correct, in, inlen);
+
+    return crypto_verify_32(h, correct) | (-(h == correct)) |
+           sodium_memcmp(correct, h, 32);
+}
+
+int
+crypto_hash_sha256_final_verify(crypto_hash_sha256_state *state,
+                                const unsigned char      *h) {
+    unsigned char correct[32];
+
+    crypto_hash_sha256_final(state, correct);
+
+    return crypto_verify_32(h, correct) | (-(h == correct)) |
+           sodium_memcmp(correct, h, 32);
+}
+
+int
+crypto_hash_sha512_verify(const unsigned char *h,
+                          const unsigned char *in,
+                          unsigned long long  inlen) {
+    unsigned char correct[64];
+
+    crypto_hash_sha512(correct, in, inlen);
+
+    return crypto_verify_64(h, correct) | (-(h == correct)) |
+           sodium_memcmp(correct, h, 64);
+}
+
+int
+crypto_hash_sha512_final_verify(crypto_hash_sha512_state *state,
+                                const unsigned char      *h) {
+    unsigned char correct[64];
+
+    crypto_hash_sha512_final(state, correct);
+
+    return crypto_verify_64(h, correct) | (-(h == correct)) |
+           sodium_memcmp(correct, h, 64);
+}
+
 /* STATIC VALUES */
 ERL_NIF_TERM atom_ok;
 ERL_NIF_TERM atom_error;
@@ -650,6 +696,120 @@ SALTY_FUNC(generichash_blake2b_final, 2) DO
 END_OK_WITH(hash);
 
 /**
+ * HASH Sha256
+ */
+SALTY_CONST_INT64(hash_sha256_BYTES);
+
+SALTY_FUNC(hash_sha256, 1) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+
+    SALTY_OUTPUT_BIN(hash, crypto_hash_sha256_BYTES);
+
+    SALTY_CALL(crypto_hash_sha256(hash.data, msg.data, msg.size), hash);
+END_OK_WITH(hash);
+
+SALTY_FUNC(hash_sha256_verify, 2) DO
+    SALTY_INPUT_BIN(0, hash, crypto_hash_sha256_BYTES);
+    SALTY_INPUT_BIN(1, msg, SALTY_BIN_NO_SIZE);
+
+    SALTY_CALL_SIMPLE_WITHERR(crypto_hash_sha256_verify(
+                hash.data, msg.data, msg.size),
+            atom_error_no_match);
+END_OK;
+
+SALTY_FUNC(hash_sha256_init, 0) DO
+    SALTY_OUTPUT_BIN(state, crypto_hash_sha256_statebytes());
+
+    SALTY_CALL(crypto_hash_sha256_init(
+                (crypto_hash_sha256_state *) state.data), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(hash_sha256_update, 2) DO
+    SALTY_INPUT_BIN(0, state, crypto_hash_sha256_statebytes());
+    SALTY_INPUT_BIN(1, input, SALTY_BIN_NO_SIZE);
+
+    SALTY_CALL(crypto_hash_sha256_update(
+                (crypto_hash_sha256_state *) state.data,
+                input.data, input.size), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(hash_sha256_final, 1) DO
+    SALTY_INPUT_BIN(0, state, crypto_hash_sha256_statebytes());
+
+    SALTY_OUTPUT_BIN(hash, crypto_hash_sha256_BYTES);
+
+    SALTY_CALL(crypto_hash_sha256_final(
+                (crypto_hash_sha256_state *) state.data,
+                hash.data), hash);
+END_OK_WITH(hash);
+
+SALTY_FUNC(hash_sha256_final_verify, 2) DO
+    SALTY_INPUT_BIN(0, state, crypto_hash_sha256_statebytes());
+    SALTY_INPUT_BIN(1, expect, crypto_hash_sha256_BYTES);
+
+    SALTY_CALL_SIMPLE_WITHERR(crypto_hash_sha256_final_verify(
+                (crypto_hash_sha256_state *) state.data, expect.data),
+            atom_error_forged);
+END_OK;
+
+/**
+ * HASH Sha512
+ */
+SALTY_CONST_INT64(hash_sha512_BYTES);
+
+SALTY_FUNC(hash_sha512, 1) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+
+    SALTY_OUTPUT_BIN(hash, crypto_hash_sha512_BYTES);
+
+    SALTY_CALL(crypto_hash_sha512(hash.data, msg.data, msg.size), hash);
+END_OK_WITH(hash);
+
+SALTY_FUNC(hash_sha512_verify, 2) DO
+    SALTY_INPUT_BIN(0, hash, crypto_hash_sha512_BYTES);
+    SALTY_INPUT_BIN(1, msg, SALTY_BIN_NO_SIZE);
+
+    SALTY_CALL_SIMPLE_WITHERR(crypto_hash_sha512_verify(
+                hash.data, msg.data, msg.size),
+            atom_error_no_match);
+END_OK;
+
+SALTY_FUNC(hash_sha512_init, 0) DO
+    SALTY_OUTPUT_BIN(state, crypto_hash_sha512_statebytes());
+
+    SALTY_CALL(crypto_hash_sha512_init(
+                (crypto_hash_sha512_state *) state.data), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(hash_sha512_update, 2) DO
+    SALTY_INPUT_BIN(0, state, crypto_hash_sha512_statebytes());
+    SALTY_INPUT_BIN(1, input, SALTY_BIN_NO_SIZE);
+
+    SALTY_CALL(crypto_hash_sha512_update(
+                (crypto_hash_sha512_state *) state.data,
+                input.data, input.size), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(hash_sha512_final, 1) DO
+    SALTY_INPUT_BIN(0, state, crypto_hash_sha512_statebytes());
+
+    SALTY_OUTPUT_BIN(hash, crypto_hash_sha512_BYTES);
+
+    SALTY_CALL(crypto_hash_sha512_final(
+                (crypto_hash_sha512_state *) state.data,
+                hash.data), hash);
+END_OK_WITH(hash);
+
+SALTY_FUNC(hash_sha512_final_verify, 2) DO
+    SALTY_INPUT_BIN(0, state, crypto_hash_sha512_statebytes());
+    SALTY_INPUT_BIN(1, expect, crypto_hash_sha512_BYTES);
+
+    SALTY_CALL_SIMPLE_WITHERR(crypto_hash_sha512_final_verify(
+                (crypto_hash_sha512_state *) state.data, expect.data),
+            atom_error_forged);
+END_OK;
+
+/**
  * RANDOMBYTES
  */
 SALTY_CONST_INT64(randombytes_SEEDBYTES);
@@ -763,6 +923,22 @@ salty_exports[] = {
     SALTY_EXPORT_FUNC(generichash_blake2b_init_salt_personal, 4),
     SALTY_EXPORT_FUNC(generichash_blake2b_update, 2),
     SALTY_EXPORT_FUNC(generichash_blake2b_final, 2),
+
+    SALTY_EXPORT_CONS(hash_sha256_BYTES, 0),
+    SALTY_EXPORT_FUNC(hash_sha256, 1),
+    SALTY_EXPORT_FUNC(hash_sha256_verify, 2),
+    SALTY_EXPORT_FUNC(hash_sha256_init, 0),
+    SALTY_EXPORT_FUNC(hash_sha256_update, 2),
+    SALTY_EXPORT_FUNC(hash_sha256_final, 1),
+    SALTY_EXPORT_FUNC(hash_sha256_final_verify, 2),
+
+    SALTY_EXPORT_CONS(hash_sha512_BYTES, 0),
+    SALTY_EXPORT_FUNC(hash_sha512, 1),
+    SALTY_EXPORT_FUNC(hash_sha512_verify, 2),
+    SALTY_EXPORT_FUNC(hash_sha512_init, 0),
+    SALTY_EXPORT_FUNC(hash_sha512_update, 2),
+    SALTY_EXPORT_FUNC(hash_sha512_final, 1),
+    SALTY_EXPORT_FUNC(hash_sha512_final_verify, 2),
 
     SALTY_EXPORT_FUNC(randombytes_SEEDBYTES, 0),
     SALTY_EXPORT_FUNC(randombytes_random, 0),

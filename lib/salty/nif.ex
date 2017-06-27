@@ -83,6 +83,22 @@ defmodule Salty.Nif do
   def generichash_blake2b_update(_,_), do: :erlang.exit(:salty_nif_not_loaded)
   def generichash_blake2b_final(_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
+  def hash_sha256_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha256(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha256_verify(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha256_init(), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha256_update(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha256_final(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha256_final_verify(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
+  def hash_sha512_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha512(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha512_verify(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha512_init(), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha512_update(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha512_final(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def hash_sha512_final_verify(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
   def randombytes_SEEDBYTES(), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_random(), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_stir(), do: :erlang.exit(:salty_nif_not_loaded)
