@@ -113,6 +113,14 @@ defmodule Salty.Nif do
   def scalarmult_curve25519_base(_), do: :erlang.exit(:salty_nif_not_loaded)
   def scalarmult_curve25519(_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
+  def shorthash_siphash24_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def shorthash_siphash24_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def shorthash_siphash24(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
+  def shorthash_siphashx24_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def shorthash_siphashx24_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def shorthash_siphashx24(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
   def randombytes_SEEDBYTES(), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_random(), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_stir(), do: :erlang.exit(:salty_nif_not_loaded)

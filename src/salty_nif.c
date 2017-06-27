@@ -898,12 +898,44 @@ END_OK_WITH(q);
 
 SALTY_FUNC(scalarmult_curve25519, 2) DO
     SALTY_INPUT_BIN(0, n, crypto_scalarmult_curve25519_SCALARBYTES);
-    SALTY_INPUT_BIN(0, p, crypto_scalarmult_curve25519_SCALARBYTES);
+    SALTY_INPUT_BIN(1, p, crypto_scalarmult_curve25519_SCALARBYTES);
 
     SALTY_OUTPUT_BIN(q, crypto_scalarmult_curve25519_BYTES);
 
     SALTY_CALL(crypto_scalarmult_curve25519(q.data, n.data, p.data), q)
 END_OK_WITH(q);
+
+/**
+ * SHORTHASH Siphash24
+ */
+SALTY_CONST_INT64(shorthash_siphash24_BYTES);
+SALTY_CONST_INT64(shorthash_siphash24_KEYBYTES);
+
+SALTY_FUNC(shorthash_siphash24, 2) DO
+    SALTY_INPUT_BIN(0, data, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, key, crypto_shorthash_siphash24_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(hash, crypto_shorthash_siphash24_BYTES);
+
+    SALTY_CALL(crypto_shorthash_siphash24(
+                hash.data, data.data, data.size, key.data), hash);
+END_OK_WITH(hash);
+
+/**
+ * SHORTHASH Siphashx24
+ */
+SALTY_CONST_INT64(shorthash_siphashx24_BYTES);
+SALTY_CONST_INT64(shorthash_siphashx24_KEYBYTES);
+
+SALTY_FUNC(shorthash_siphashx24, 2) DO
+    SALTY_INPUT_BIN(0, data, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, key, crypto_shorthash_siphashx24_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(hash, crypto_shorthash_siphashx24_BYTES);
+
+    SALTY_CALL(crypto_shorthash_siphashx24(
+                hash.data, data.data, data.size, key.data), hash);
+END_OK_WITH(hash);
 
 /**
  * RANDOMBYTES
@@ -1049,6 +1081,14 @@ salty_exports[] = {
     SALTY_EXPORT_CONS(scalarmult_curve25519_SCALARBYTES, 0),
     SALTY_EXPORT_FUNC(scalarmult_curve25519_base, 1),
     SALTY_EXPORT_FUNC(scalarmult_curve25519, 2),
+
+    SALTY_EXPORT_CONS(shorthash_siphash24_BYTES, 0),
+    SALTY_EXPORT_CONS(shorthash_siphash24_KEYBYTES, 0),
+    SALTY_EXPORT_CONS(shorthash_siphash24, 2),
+
+    SALTY_EXPORT_CONS(shorthash_siphashx24_BYTES, 0),
+    SALTY_EXPORT_CONS(shorthash_siphashx24_KEYBYTES, 0),
+    SALTY_EXPORT_CONS(shorthash_siphashx24, 2),
 
     SALTY_EXPORT_FUNC(randombytes_SEEDBYTES, 0),
     SALTY_EXPORT_FUNC(randombytes_random, 0),
