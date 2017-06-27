@@ -883,6 +883,29 @@ SALTY_FUNC(onetimeauth_poly1305_final_verify, 2) DO
 END_OK;
 
 /**
+ * SCALARMULT Curve25519
+ */
+SALTY_CONST_INT64(scalarmult_curve25519_BYTES);
+SALTY_CONST_INT64(scalarmult_curve25519_SCALARBYTES);
+
+SALTY_FUNC(scalarmult_curve25519_base, 1) DO
+    SALTY_INPUT_BIN(0, n, crypto_scalarmult_curve25519_SCALARBYTES);
+
+    SALTY_OUTPUT_BIN(q, crypto_scalarmult_curve25519_BYTES);
+
+    SALTY_CALL(crypto_scalarmult_curve25519_base(q.data, n.data), q)
+END_OK_WITH(q);
+
+SALTY_FUNC(scalarmult_curve25519, 2) DO
+    SALTY_INPUT_BIN(0, n, crypto_scalarmult_curve25519_SCALARBYTES);
+    SALTY_INPUT_BIN(0, p, crypto_scalarmult_curve25519_SCALARBYTES);
+
+    SALTY_OUTPUT_BIN(q, crypto_scalarmult_curve25519_BYTES);
+
+    SALTY_CALL(crypto_scalarmult_curve25519(q.data, n.data, p.data), q)
+END_OK_WITH(q);
+
+/**
  * RANDOMBYTES
  */
 SALTY_CONST_INT64(randombytes_SEEDBYTES);
@@ -1021,6 +1044,11 @@ salty_exports[] = {
     SALTY_EXPORT_FUNC(onetimeauth_poly1305_update, 2),
     SALTY_EXPORT_FUNC(onetimeauth_poly1305_final, 1),
     SALTY_EXPORT_FUNC(onetimeauth_poly1305_final_verify, 2),
+
+    SALTY_EXPORT_CONS(scalarmult_curve25519_BYTES, 0),
+    SALTY_EXPORT_CONS(scalarmult_curve25519_SCALARBYTES, 0),
+    SALTY_EXPORT_FUNC(scalarmult_curve25519_base, 1),
+    SALTY_EXPORT_FUNC(scalarmult_curve25519, 2),
 
     SALTY_EXPORT_FUNC(randombytes_SEEDBYTES, 0),
     SALTY_EXPORT_FUNC(randombytes_random, 0),

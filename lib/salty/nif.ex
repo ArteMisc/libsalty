@@ -108,6 +108,11 @@ defmodule Salty.Nif do
   def onetimeauth_poly1305_final(_), do: :erlang.exit(:salty_nif_not_loaded)
   def onetimeauth_poly1305_final_verify(_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
+  def scalarmult_curve25519_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def scalarmult_curve25519_SCALARBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def scalarmult_curve25519_base(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def scalarmult_curve25519(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
   def randombytes_SEEDBYTES(), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_random(), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_stir(), do: :erlang.exit(:salty_nif_not_loaded)
