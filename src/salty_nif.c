@@ -938,6 +938,101 @@ SALTY_FUNC(shorthash_siphashx24, 2) DO
 END_OK_WITH(hash);
 
 /**
+ * SIGN Ed25519
+ */
+SALTY_CONST_INT64(sign_ed25519_BYTES);
+SALTY_CONST_INT64(sign_ed25519_SEEDBYTES);
+SALTY_CONST_INT64(sign_ed25519_PUBLICKEYBYTES);
+SALTY_CONST_INT64(sign_ed25519_SECRETKEYBYTES);
+
+SALTY_FUNC(sign_ed25519_seed_keypair, 1) DO
+    unsigned char tmp[crypto_sign_ed25519_PUBLICKEYBYTES];
+
+    SALTY_INPUT_BIN(0, seed, crypto_sign_ed25519_SEEDBYTES);
+
+    SALTY_OUTPUT_BIN(sk, crypto_sign_ed25519_SECRETKEYBYTES);
+
+    SALTY_CALL(crypto_sign_ed25519_seed_keypair(
+                tmp, sk.data, seed.data), sk);
+END_OK_WITH(sk);
+
+SALTY_FUNC(sign_ed25519_keypair, 0) DO
+    unsigned char tmp[crypto_sign_ed25519_PUBLICKEYBYTES];
+
+    SALTY_OUTPUT_BIN(sk, crypto_sign_ed25519_SECRETKEYBYTES);
+
+    SALTY_CALL(crypto_sign_ed25519_keypair(
+                tmp, sk.data), sk);
+END_OK_WITH(sk);
+
+SALTY_FUNC(sign_ed25519, 2) DO
+    SALTY_INPUT_BIN(0, data, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, sk, crypto_sign_ed25519_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(sm, data.size + crypto_sign_ed25519_BYTES);
+
+    SALTY_CALL(crypto_sign_ed25519(
+                sm.data, NULL, data.data, data.size, sk.data), sm);
+END_OK_WITH(sm);
+
+SALTY_FUNC(sign_ed25519_detached, 2) DO
+    SALTY_INPUT_BIN(0, data, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, sk, crypto_sign_ed25519_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(sig, crypto_sign_ed25519_BYTES);
+
+    SALTY_CALL(crypto_sign_ed25519_detached(
+                sig.data, NULL, data.data, data.size, sk.data), sig);
+END_OK_WITH(sig);
+
+SALTY_FUNC(sign_ed25519_verify_detached, 3) DO
+    SALTY_INPUT_BIN(0, sig, crypto_sign_ed25519_BYTES);
+    SALTY_INPUT_BIN(1, data, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(2, pk, crypto_sign_ed25519_PUBLICKEYBYTES);
+
+    SALTY_CALL_SIMPLE_WITHERR(crypto_sign_ed25519_verify_detached(
+                sig.data, data.data, data.size, pk.data),
+            atom_error_forged);
+END_OK;
+
+SALTY_FUNC(sign_ed25519ph_init, 0) DO
+    SALTY_OUTPUT_BIN(state, crypto_sign_ed25519ph_statebytes());
+
+    SALTY_CALL(crypto_sign_ed25519ph_init(
+                (crypto_sign_ed25519ph_state *) state.data), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(sign_ed25519ph_update, 2) DO
+    SALTY_INPUT_BIN(0, state, crypto_sign_ed25519ph_statebytes());
+    SALTY_INPUT_BIN(1, data, SALTY_BIN_NO_SIZE);
+
+    SALTY_CALL(crypto_sign_ed25519ph_update(
+                (crypto_sign_ed25519ph_state *) state.data,
+                data.data, data.size), state);
+END_OK_WITH(state);
+
+SALTY_FUNC(sign_ed25519ph_final_create, 2) DO
+    SALTY_INPUT_BIN(0, state, crypto_sign_ed25519ph_statebytes());
+    SALTY_INPUT_BIN(1, sk, crypto_sign_ed25519_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(sig, crypto_sign_ed25519_BYTES);
+
+    SALTY_CALL(crypto_sign_ed25519ph_final_create(
+                (crypto_sign_ed25519ph_state *) state.data,
+                sig.data, NULL, sk.data), sig);
+END_OK_WITH(sig);
+
+SALTY_FUNC(sign_ed25519ph_final_verify, 3) DO
+    SALTY_INPUT_BIN(0, state, crypto_sign_ed25519ph_statebytes());
+    SALTY_INPUT_BIN(1, sig, crypto_sign_ed25519_BYTES);
+    SALTY_INPUT_BIN(2, pk, crypto_sign_ed25519_PUBLICKEYBYTES);
+
+    SALTY_CALL_SIMPLE(crypto_sign_ed25519ph_final_verify(
+                (crypto_sign_ed25519ph_state *) state.data,
+                sig.data, pk.data));
+END_OK;
+
+/**
  * RANDOMBYTES
  */
 SALTY_CONST_INT64(randombytes_SEEDBYTES);
@@ -1089,6 +1184,20 @@ salty_exports[] = {
     SALTY_EXPORT_CONS(shorthash_siphashx24_BYTES, 0),
     SALTY_EXPORT_CONS(shorthash_siphashx24_KEYBYTES, 0),
     SALTY_EXPORT_CONS(shorthash_siphashx24, 2),
+
+    SALTY_EXPORT_CONS(sign_ed25519_BYTES, 0),
+    SALTY_EXPORT_CONS(sign_ed25519_SEEDBYTES, 0),
+    SALTY_EXPORT_CONS(sign_ed25519_PUBLICKEYBYTES, 0),
+    SALTY_EXPORT_CONS(sign_ed25519_SECRETKEYBYTES, 0),
+    SALTY_EXPORT_FUNC(sign_ed25519_seed_keypair, 1),
+    SALTY_EXPORT_FUNC(sign_ed25519_keypair, 0),
+    SALTY_EXPORT_FUNC(sign_ed25519, 2),
+    SALTY_EXPORT_FUNC(sign_ed25519_detached, 2),
+    SALTY_EXPORT_FUNC(sign_ed25519_verify_detached, 3),
+    SALTY_EXPORT_FUNC(sign_ed25519ph_init, 0),
+    SALTY_EXPORT_FUNC(sign_ed25519ph_update, 2),
+    SALTY_EXPORT_FUNC(sign_ed25519ph_final_create, 2),
+    SALTY_EXPORT_FUNC(sign_ed25519ph_final_verify, 3),
 
     SALTY_EXPORT_FUNC(randombytes_SEEDBYTES, 0),
     SALTY_EXPORT_FUNC(randombytes_random, 0),

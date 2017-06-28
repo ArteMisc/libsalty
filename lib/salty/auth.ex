@@ -15,9 +15,9 @@ defmodule Salty.Auth do
 
   @callback keybytes() :: non_neg_integer()
 
-  @callback auth(binary(), binary()) :: {:ok, binary()} | {:error, any()}
+  @callback auth(binary(), binary()) :: {:ok, binary()} | {:error, atom()}
 
-  @callback verify(binary(), binary(), binary()) :: :ok | {:error, any()}
+  @callback verify(binary(), binary(), binary()) :: :ok | {:error, atom()}
 
-  @callback init(binary()) :: {:ok, binary()} | {:error, any()}
+  @callback init(binary()) :: {:ok, binary()} | {:error, atom()}
 end

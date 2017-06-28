@@ -10,8 +10,8 @@ defmodule Salty.Scalarmult do
 
   @callback scalarbytes() :: non_neg_integer()
 
-  @callback scalarmult_base(binary()) :: {:ok, binary()} | {:error, any()}
+  @callback scalarmult_base(binary()) :: {:ok, binary()} | {:error, atom()}
 
-  @callback scalarmult(binary(), binary()) :: {:ok, binary()} | {:error, any()}
+  @callback scalarmult(binary(), binary()) :: {:ok, binary()} | {:error, atom()}
 
 end

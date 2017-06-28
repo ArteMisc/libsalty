@@ -23,13 +23,13 @@ defmodule Salty.Generichash do
 
   @callback keybytes :: non_neg_integer()
 
-  @callback hash(binary(), binary(), binary()) :: {:ok, binary()} | {:error, any()}
+  @callback hash(binary(), binary(), binary()) :: {:ok, binary()} | {:error, atom()}
 
-  @callback init(binary(), non_neg_integer()) :: {:ok, binary()} | {:error, any()}
+  @callback init(binary(), non_neg_integer()) :: {:ok, binary()} | {:error, atom()}
 
-  @callback update(binary(), binary()) :: {:ok, binary()} | {:error, any()}
+  @callback update(binary(), binary()) :: {:ok, binary()} | {:error, atom()}
 
-  @callback final(binary(), non_neg_integer()) :: {:ok, binary()} | {:error, any()}
+  @callback final(binary(), non_neg_integer()) :: {:ok, binary()} | {:error, atom()}
 
-  @callback final_verify(binary(), binary()) :: :ok | {:error, any()}
+  @callback final_verify(binary(), binary()) :: :ok | {:error, atom()}
 end

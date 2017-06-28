@@ -13,10 +13,10 @@ defmodule Salty.Hash do
 
   @callback bytes() :: non_neg_integer()
 
-  @callback hash(binary()) :: {:ok, binary()} | {:error, any()}
+  @callback hash(binary()) :: {:ok, binary()} | {:error, atom()}
 
-  @callback verify(binary(), binary()) :: :ok | {:error, any()}
+  @callback verify(binary(), binary()) :: :ok | {:error, atom()}
 
-  @callback init() :: {:ok, binary()} | {:error, any()}
+  @callback init() :: {:ok, binary()} | {:error, atom()}
 
 end

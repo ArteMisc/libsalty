@@ -30,7 +30,7 @@ defmodule Salty.Aead do
 
   @callback a_bytes() :: non_neg_integer()
 
-  @callback encrypt(binary(), binary(), binary() | nil, binary(), binary()) :: {:ok, binary()} | {:error, any()}
+  @callback encrypt(binary(), binary(), binary() | nil, binary(), binary()) :: {:ok, binary()} | {:error, atom()}
 
-  @callback decrypt_detached(binary() | nil, binary(), binary(), binary(), binary(), binary()) :: {:ok, binary()} | {:error, any()}
+  @callback decrypt_detached(binary() | nil, binary(), binary(), binary(), binary(), binary()) :: {:ok, binary()} | {:error, atom()}
 end

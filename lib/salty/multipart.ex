@@ -1,15 +1,15 @@
 defmodule Salty.Multipart do
 
   defmodule Spec do
-    @callback update(binary(), binary()) :: {:ok, binary()} | {:error, any()}
-    @callback final(binary()) :: {:ok, binary()} | {:error, any()}
-    @callback final_verify(binary(), binary()) :: :ok | {:error, any()}
+    @callback update(binary(), binary()) :: {:ok, binary()} | {:error, atom()}
+    @callback final(binary()) :: {:ok, binary()} | {:error, atom()}
+    @callback final_verify(binary(), binary()) :: :ok | {:error, atom()}
   end
 
   defmodule SignSpec do
-    @callback update(binary(), binary()) :: {:ok, binary()} | {:error, any()}
-    @callback final(binary(), binary()) :: {:ok, binary()} | {:error, any()}
-    @callback final_verify(binary(), binary(), binary()) :: :ok | {:error, any()}
+    @callback update(binary(), binary()) :: {:ok, binary()} | {:error, atom()}
+    @callback final(binary(), binary()) :: {:ok, binary()} | {:error, atom()}
+    @callback final_verify(binary(), binary(), binary()) :: :ok | {:error, atom()}
   end
 
   def init(spec) do
