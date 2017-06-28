@@ -99,6 +99,12 @@ defmodule Salty.Nif do
   def hash_sha512_final(_), do: :erlang.exit(:salty_nif_not_loaded)
   def hash_sha512_final_verify(_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
+  def kdf_blake2b_BYTES_MIN, do: :erlang.exit(:salty_nif_not_loaded)
+  def kdf_blake2b_BYTES_MAX, do: :erlang.exit(:salty_nif_not_loaded)
+  def kdf_blake2b_CONTEXTBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def kdf_blake2b_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def kdf_blake2b_derive_from_key(_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
   def onetimeauth_poly1305_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def onetimeauth_poly1305_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def onetimeauth_poly1305(_,_), do: :erlang.exit(:salty_nif_not_loaded)

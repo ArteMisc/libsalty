@@ -820,6 +820,27 @@ SALTY_FUNC(hash_sha512_final_verify, 2) DO
 END_OK;
 
 /**
+ * KDF Blake2b
+ */
+SALTY_CONST_INT64(kdf_blake2b_BYTES_MIN);
+SALTY_CONST_INT64(kdf_blake2b_BYTES_MAX);
+SALTY_CONST_INT64(kdf_blake2b_CONTEXTBYTES);
+SALTY_CONST_INT64(kdf_blake2b_KEYBYTES);
+
+SALTY_FUNC(kdf_blake2b_derive_from_key, 4) DO
+    SALTY_INPUT_UINT64(0, subkey_len);
+    SALTY_INPUT_UINT64(1, subkey_id);
+    SALTY_INPUT_BIN(2, ctx, crypto_kdf_blake2b_CONTEXTBYTES);
+    SALTY_INPUT_BIN(3, key, crypto_kdf_blake2b_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(subkey, subkey_len);
+
+    SALTY_CALL(crypto_kdf_blake2b_derive_from_key(
+                subkey.data, subkey_len, subkey_id,
+                (const char *) ctx.data, key.data), subkey);
+END_OK_WITH(subkey);
+
+/**
  * ONETIMEAUTH Poly1305
  */
 SALTY_CONST_INT64(onetimeauth_poly1305_BYTES);
@@ -1162,6 +1183,12 @@ salty_exports[] = {
     SALTY_EXPORT_FUNC(hash_sha512_update, 2),
     SALTY_EXPORT_FUNC(hash_sha512_final, 1),
     SALTY_EXPORT_FUNC(hash_sha512_final_verify, 2),
+
+    SALTY_EXPORT_CONS(kdf_blake2b_BYTES_MIN, 0),
+    SALTY_EXPORT_CONS(kdf_blake2b_BYTES_MAX, 0),
+    SALTY_EXPORT_CONS(kdf_blake2b_CONTEXTBYTES, 0),
+    SALTY_EXPORT_CONS(kdf_blake2b_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(kdf_blake2b_derive_from_key, 4),
 
     SALTY_EXPORT_CONS(onetimeauth_poly1305_BYTES, 0),
     SALTY_EXPORT_CONS(onetimeauth_poly1305_KEYBYTES, 0),
