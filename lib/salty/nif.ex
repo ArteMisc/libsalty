@@ -105,6 +105,15 @@ defmodule Salty.Nif do
   def kdf_blake2b_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def kdf_blake2b_derive_from_key(_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
+  def kx_PUBLICKEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def kx_SECRETKEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def kx_SEEDBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def kx_SESSIONKEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def kx_seed_keypair(_), do: :erlang.exit(:salty_nif_not_loaded)
+  def kx_keypair(), do: :erlang.exit(:salty_nif_not_loaded)
+  def kx_client_session_keys(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def kx_server_session_keys(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
   def onetimeauth_poly1305_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def onetimeauth_poly1305_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def onetimeauth_poly1305(_,_), do: :erlang.exit(:salty_nif_not_loaded)

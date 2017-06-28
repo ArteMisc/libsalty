@@ -90,6 +90,7 @@
 #define END }
 #define END_OK return (SALTY_OK); END
 #define END_OK_WITH(out) return (SALTY_OK_PAIR(OUT(out))); END
+#define END_OK_WITH2(a, b) return (SALTY_OK_TRIPLET(OUT(a), OUT(b))); END
 
 #define SALTY_CONST_INT64(constant)                                             \
     static ERL_NIF_TERM                                                         \
@@ -120,6 +121,13 @@
 #define SALTY_CALL(call, output)                                                \
     if (( call ) != SALTY_NOERR) {                                              \
         enif_release_binary(&output);                                           \
+        return (SALTY_ERROR);                                                   \
+    }
+
+#define SALTY_CALL2(call, outputa, outputb)                                     \
+    if (( call ) != SALTY_NOERR) {                                              \
+        enif_release_binary(&outputa);                                          \
+        enif_release_binary(&outputb);                                          \
         return (SALTY_ERROR);                                                   \
     }
 
@@ -841,6 +849,54 @@ SALTY_FUNC(kdf_blake2b_derive_from_key, 4) DO
 END_OK_WITH(subkey);
 
 /**
+ * KX X25519Blake2b
+ */
+SALTY_CONST_INT64(kx_PUBLICKEYBYTES);
+SALTY_CONST_INT64(kx_SECRETKEYBYTES);
+SALTY_CONST_INT64(kx_SEEDBYTES);
+SALTY_CONST_INT64(kx_SESSIONKEYBYTES);
+
+SALTY_FUNC(kx_seed_keypair, 1) DO
+    SALTY_INPUT_BIN(0, seed, crypto_kx_SEEDBYTES);
+
+    SALTY_OUTPUT_BIN(pk, crypto_kx_PUBLICKEYBYTES);
+    SALTY_OUTPUT_BIN(sk, crypto_kx_SECRETKEYBYTES);
+
+    SALTY_CALL2(crypto_kx_seed_keypair(pk.data, sk.data, seed.data), pk, sk);
+END_OK_WITH2(pk, sk);
+
+SALTY_FUNC(kx_keypair, 0) DO
+    SALTY_OUTPUT_BIN(pk, crypto_kx_PUBLICKEYBYTES);
+    SALTY_OUTPUT_BIN(sk, crypto_kx_SECRETKEYBYTES);
+
+    SALTY_CALL2(crypto_kx_keypair(pk.data, sk.data), pk, sk);
+END_OK_WITH2(pk, sk);
+
+SALTY_FUNC(kx_client_session_keys, 3) DO
+    SALTY_INPUT_BIN(0, client_pk, crypto_kx_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(1, client_sk, crypto_kx_SECRETKEYBYTES);
+    SALTY_INPUT_BIN(2, server_pk, crypto_kx_PUBLICKEYBYTES);
+
+    SALTY_OUTPUT_BIN(rx, crypto_kx_SESSIONKEYBYTES);
+    SALTY_OUTPUT_BIN(tx, crypto_kx_SESSIONKEYBYTES);
+
+    SALTY_CALL2(crypto_kx_client_session_keys(rx.data, tx.data,
+                client_pk.data, client_sk.data, server_pk.data), rx, tx);
+END_OK_WITH2(rx, tx);
+
+SALTY_FUNC(kx_server_session_keys, 3) DO
+    SALTY_INPUT_BIN(0, server_pk, crypto_kx_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(1, server_sk, crypto_kx_SECRETKEYBYTES);
+    SALTY_INPUT_BIN(2, client_pk, crypto_kx_PUBLICKEYBYTES);
+
+    SALTY_OUTPUT_BIN(rx, crypto_kx_SESSIONKEYBYTES);
+    SALTY_OUTPUT_BIN(tx, crypto_kx_SESSIONKEYBYTES);
+
+    SALTY_CALL2(crypto_kx_server_session_keys(rx.data, tx.data,
+                server_pk.data, server_sk.data, client_pk.data), rx, tx);
+END_OK_WITH2(rx, tx);
+
+/**
  * ONETIMEAUTH Poly1305
  */
 SALTY_CONST_INT64(onetimeauth_poly1305_BYTES);
@@ -1189,6 +1245,15 @@ salty_exports[] = {
     SALTY_EXPORT_CONS(kdf_blake2b_CONTEXTBYTES, 0),
     SALTY_EXPORT_CONS(kdf_blake2b_KEYBYTES, 0),
     SALTY_EXPORT_FUNC(kdf_blake2b_derive_from_key, 4),
+
+    SALTY_EXPORT_CONS(kx_PUBLICKEYBYTES, 0),
+    SALTY_EXPORT_CONS(kx_SECRETKEYBYTES, 0),
+    SALTY_EXPORT_CONS(kx_SEEDBYTES, 0),
+    SALTY_EXPORT_CONS(kx_SESSIONKEYBYTES, 0),
+    SALTY_EXPORT_FUNC(kx_seed_keypair, 1),
+    SALTY_EXPORT_FUNC(kx_keypair, 0),
+    SALTY_EXPORT_FUNC(kx_client_session_keys, 3),
+    SALTY_EXPORT_FUNC(kx_server_session_keys, 3),
 
     SALTY_EXPORT_CONS(onetimeauth_poly1305_BYTES, 0),
     SALTY_EXPORT_CONS(onetimeauth_poly1305_KEYBYTES, 0),
