@@ -32,4 +32,5 @@ defmodule Salty.Generichash do
   @callback final(binary(), non_neg_integer()) :: {:ok, binary()} | {:error, atom()}
 
   @callback final_verify(binary(), binary()) :: :ok | {:error, atom()}
+
 end

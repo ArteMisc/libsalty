@@ -60,4 +60,5 @@ defmodule Salty.Generichash.Blake2b do
   def final_verify(_state, _expected) do
     :erlang.exit(:not_implemented)
   end
+
 end

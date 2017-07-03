@@ -26,6 +26,8 @@ defmodule Salty.Secretbox do
 
   @callback seal(binary(), binary(), binary()) :: {:ok, binary()} | {:error, atom()}
 
+  @callback open(binary(), binary(), binary()) :: {:ok, binary()} | {:error, atom()}
+
   @callback seal_detached(binary(), binary(), binary()) :: {:ok, binary(), binary()} | {:error, atom()}
 
   @callback open_detached(binary(), binary(), binary(), binary()) :: {:ok, binary()} | {:error, atom()}

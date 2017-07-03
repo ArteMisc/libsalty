@@ -182,4 +182,5 @@ defmodule Salty.Nif do
   def randombytes_buf(_), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_buf_deterministic(_,_), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_close(), do: :erlang.exit(:salty_nif_not_loaded)
+
 end

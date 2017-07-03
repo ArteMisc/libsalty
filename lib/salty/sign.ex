@@ -37,6 +37,10 @@ defmodule Salty.Sign do
     Salty.Sign.Ed25519
   end
 
+  @callback sk_to_pk(binary()) :: binary()
+
+  @callback sk_to_seed(binary()) :: binary()
+
   @callback bytes() :: non_neg_integer()
 
   @callback seedbytes() :: non_neg_integer()
