@@ -4,16 +4,8 @@ defmodule Salty.Aead do
       @behaviour Salty.Aead
       alias Salty.Nif, as: C
 
-      def encrypt_detached(plain, ad, nsec, npub, key) do
-        mac_size = a_bytes()
-        case encrypt(plain, ad, nsec, npub, key) do
-          {:ok, <<mac::binary-size(mac_size),cipher::binary>>} -> {:ok, mac, cipher}
-          error -> error
-        end
-      end
-
       def decrypt(nsec, cipher, ad, npub, key) do
-        mac_size = a_bytes()
+        mac_size = abytes()
         <<mac::binary-size(mac_size),
           data::binary>> = cipher
         decrypt_detached(nsec, data, mac, ad, npub, key)
@@ -22,15 +14,19 @@ defmodule Salty.Aead do
     end
   end
 
-  @callback key_bytes() :: non_neg_integer()
+  @callback keybytes() :: non_neg_integer()
 
-  @callback nsec_bytes() :: non_neg_integer()
+  @callback nsecbytes() :: non_neg_integer()
 
-  @callback npub_bytes() :: non_neg_integer()
+  @callback npubbytes() :: non_neg_integer()
 
-  @callback a_bytes() :: non_neg_integer()
+  @callback abytes() :: non_neg_integer()
 
   @callback encrypt(binary(), binary(), binary() | nil, binary(), binary()) :: {:ok, binary()} | {:error, atom()}
+
+  @callback encrypt_detached(binary(), binary(), binary() | nil, binary(), binary()) :: {:ok, binary(), binary()} | {:error, atom()}
+
+  @callback decrypt(binary() | nil, binary(), binary(), binary(), binary()) :: {:ok, binary()} | {:error, atom()}
 
   @callback decrypt_detached(binary() | nil, binary(), binary(), binary(), binary(), binary()) :: {:ok, binary()} | {:error, atom()}
 end

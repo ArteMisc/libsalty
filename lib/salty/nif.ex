@@ -22,6 +22,7 @@ defmodule Salty.Nif do
   def aead_aes256gcm_ABYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_aes256gcm_is_available, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_aes256gcm_encrypt(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_aes256gcm_encrypt_detached(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
   def aead_aes256gcm_decrypt_detached(_,_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
   def aead_chacha20poly1305_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
@@ -29,13 +30,23 @@ defmodule Salty.Nif do
   def aead_chacha20poly1305_NPUBBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_chacha20poly1305_ABYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_chacha20poly1305_encrypt(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_chacha20poly1305_encrypt_detached(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
   def aead_chacha20poly1305_decrypt_detached(_,_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
+  def aead_chacha20poly1305_ietf_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_chacha20poly1305_ietf_NSECBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_chacha20poly1305_ietf_NPUBBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_chacha20poly1305_ietf_ABYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_chacha20poly1305_ietf_encrypt(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_chacha20poly1305_ietf_encrypt_detached(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_chacha20poly1305_ietf_decrypt_detached(_,_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
   def aead_xchacha20poly1305_ietf_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_xchacha20poly1305_ietf_NSECBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_xchacha20poly1305_ietf_NPUBBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_xchacha20poly1305_ietf_ABYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def aead_xchacha20poly1305_ietf_encrypt(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def aead_xchacha20poly1305_ietf_encrypt_detached(_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
   def aead_xchacha20poly1305_ietf_decrypt_detached(_,_,_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
   def auth_hmacsha256_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
@@ -127,6 +138,20 @@ defmodule Salty.Nif do
   def scalarmult_curve25519_SCALARBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def scalarmult_curve25519_base(_), do: :erlang.exit(:salty_nif_not_loaded)
   def scalarmult_curve25519(_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
+  def secretbox_xchacha20poly1305_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xchacha20poly1305_NONCEBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xchacha20poly1305_MACBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xchacha20poly1305_easy(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xchacha20poly1305_detached(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xchacha20poly1305_open_detached(_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+
+  def secretbox_xsalsa20poly1305_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xsalsa20poly1305_NONCEBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xsalsa20poly1305_MACBYTES, do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xsalsa20poly1305_easy(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xsalsa20poly1305_detached(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
+  def secretbox_xsalsa20poly1305_open_detached(_,_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
   def shorthash_siphash24_BYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def shorthash_siphash24_KEYBYTES, do: :erlang.exit(:salty_nif_not_loaded)
