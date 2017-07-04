@@ -13,7 +13,7 @@ defmodule Salty.Scalarmult.Curve25519 do
     C.scalarmult_curve25519_base(n)
   end
 
-  def scalarmult_base(n, p) do
+  def scalarmult(n, p) do
     C.scalarmult_curve25519(n, p)
   end
 

@@ -6,6 +6,10 @@ defmodule Salty.Scalarmult do
     end
   end
 
+  def primitive do
+    Salty.Scalarmult.Curve25519
+  end
+
   @callback bytes() :: non_neg_integer()
 
   @callback scalarbytes() :: non_neg_integer()
