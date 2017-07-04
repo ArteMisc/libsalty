@@ -1,10 +1,24 @@
 # Salty
 
-Salty provides bindings to [libsodium](https://github.com/jedisct1/libsodium)
-for Elixir, based on Nifs.
+Libsalty provides bindings to [libsodium](https://github.com/jedisct1/libsodium)
+for Elixir, based on [Erlang nif](http://erlang.org/doc/man/erl_nif.html).
 
-_This is a Work In Progress, bindings and API are incomplete and unstable_
+credits to [**Libsodium**](https://github.com/jedisct1/libsodium): author [Frank Denis](https://github.com/jedisct1)
+and [Contributors](https://github.com/jedisct1/libsodium/graphs/contributors).
+Libsodium is licensed under [ISC License](https://github.com/jedisct1/libsodium/blob/master/LICENSE)
 
-credits to [**Libsodium**](https://github.com/jedisct1/libsodium): author [Frank Denis](https://github.com/jedisct1) and [Contributors](https://github.com/jedisct1/libsodium/graphs/contributors).  Libsodium is licensed under [ISC License](https://github.com/jedisct1/libsodium/blob/master/LICENSE)
+## License
 
-This work is licensed under Apache 2.0
+Copyright 2017 Project ArteMisc
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
