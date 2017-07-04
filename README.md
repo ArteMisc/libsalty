@@ -7,6 +7,10 @@ credits to [**Libsodium**](https://github.com/jedisct1/libsodium): author [Frank
 and [Contributors](https://github.com/jedisct1/libsodium/graphs/contributors).
 Libsodium is licensed under [ISC License](https://github.com/jedisct1/libsodium/blob/master/LICENSE)
 
+## Hex
+
+This package is available through [Hex](https://hex.pm/packages/libsalty).
+
 ## License
 
 Copyright 2017 Project ArteMisc

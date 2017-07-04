@@ -49,7 +49,7 @@ defmodule Salty.Mixfile do
 
   defp package do
     [
-      name: "Libsalty",
+      name: "libsalty",
       files: ["config", "src", "lib", "mix.exs", "Makefile", "LICENSE*", "README*"],
       maintainers: ["jan@artemisc.eu"],
       licenses: ["Apacha License, Version 2.0"],
