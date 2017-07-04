@@ -15,6 +15,7 @@
  */
 
 #include <stdbool.h>
+#include <string.h>
 #include "sodium.h"
 #include "erl_nif.h"
 
@@ -144,6 +145,12 @@
 #undef randombytes_SEEDBYTES
 
 /**
+ * Additional self-defined constants that are missing but required
+ */
+#define crypto_box_curve25519xchacha20poly1305_SEALBYTES (crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES + crypto_box_curve25519xchacha20poly1305_MACBYTES)
+#define crypto_box_curve25519xsalsa20poly1305_SEALBYTES (crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES + crypto_box_curve25519xsalsa20poly1305_MACBYTES)
+
+/**
  * Additional self defined functions to make writing bindings easier. These are
  * all based on code found in libsodium's source.
  */
@@ -178,6 +185,142 @@ crypto_auth_hmacsha512256_final_verify(crypto_auth_hmacsha512256_state *state,
 
     return crypto_verify_32(h, correct) | (-(h == correct)) |
            sodium_memcmp(correct, h, 32);
+}
+
+static int
+_crypto_box_curve25519xchacha20poly1305_seal_nonce(unsigned char       *nonce,
+                                                   const unsigned char *pk1,
+                                                   const unsigned char *pk2) {
+    crypto_generichash_state st;
+
+    crypto_generichash_init(&st, NULL, 0U, crypto_box_NONCEBYTES);
+    crypto_generichash_update(&st, pk1, crypto_box_PUBLICKEYBYTES);
+    crypto_generichash_update(&st, pk2, crypto_box_PUBLICKEYBYTES);
+    crypto_generichash_final(&st, nonce, crypto_box_NONCEBYTES);
+
+    return 0;
+}
+
+int
+crypto_box_curve25519xchacha20poly1305_seal(unsigned char       *c,
+                                            const unsigned char *m,
+                                            unsigned long long  mlen,
+                                            const unsigned char *pk) {
+    unsigned char nonce[crypto_box_curve25519xchacha20poly1305_NONCEBYTES];
+    unsigned char epk[crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES];
+    unsigned char esk[crypto_box_curve25519xchacha20poly1305_SECRETKEYBYTES];
+    int           ret;
+
+    if (crypto_box_curve25519xchacha20poly1305_keypair(epk, esk) != 0) {
+        return -1; /* LCOV_EXCL_LINE */
+    }
+    memcpy(c, epk, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    _crypto_box_curve25519xchacha20poly1305_seal_nonce(nonce, epk, pk);
+    ret = crypto_box_easy(c + crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES,
+                          m, mlen, nonce, pk, esk);
+    sodium_memzero(esk, sizeof esk);
+    sodium_memzero(epk, sizeof epk);
+    sodium_memzero(nonce, sizeof nonce);
+
+    return ret;
+}
+
+int
+crypto_box_curve25519xchacha20poly1305_seal_open(unsigned char       *m,
+                                                 const unsigned char *c,
+                                                 unsigned long long  clen,
+                                                 const unsigned char *pk,
+                                                 const unsigned char *sk) {
+    unsigned char nonce[crypto_box_curve25519xchacha20poly1305_NONCEBYTES];
+
+    if (clen < crypto_box_curve25519xchacha20poly1305_SEALBYTES) {
+        return -1;
+    }
+    _crypto_box_curve25519xchacha20poly1305_seal_nonce(nonce, c, pk);
+
+    /*COMPILER_ASSERT(crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES < crypto_box_curve25519xchacha20poly1305_SEALBYTES);*/
+    return crypto_box_open_easy(m, c + crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES,
+                                clen - crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES,
+                                nonce, c, sk);
+}
+
+int
+crypto_box_curve25519xsalsa20poly1305_easy(unsigned char       *c,
+                                           const unsigned char *m,
+                                           unsigned long long  mlen,
+                                           const unsigned char *n,
+                                           const unsigned char *pk,
+                                           const unsigned char *sk) {
+    return crypto_box_easy(c, m, mlen, n, pk, sk);
+}
+
+int
+crypto_box_curve25519xsalsa20poly1305_detached(unsigned char       *c,
+                                               unsigned char       *mac,
+                                               const unsigned char *m,
+                                               unsigned long long  mlen,
+                                               const unsigned char *n,
+                                               const unsigned char *pk,
+                                               const unsigned char *sk) {
+    return crypto_box_detached(c, mac, m, mlen, n, pk, sk);
+}
+
+int
+crypto_box_curve25519xsalsa20poly1305_open_detached(unsigned char       *m,
+                                                    const unsigned char *c,
+                                                    const unsigned char *mac,
+                                                    unsigned long long  clen,
+                                                    const unsigned char *n,
+                                                    const unsigned char *pk,
+                                                    const unsigned char *sk) {
+    return crypto_box_open_detached(m, c, mac, clen, n, pk, sk);
+}
+
+int
+crypto_box_curve25519xsalsa20poly1305_easy_afternm(unsigned char       *c,
+                                                   const unsigned char *m,
+                                                   unsigned long long  mlen,
+                                                   const unsigned char *n,
+                                                   const unsigned char *k) {
+    return crypto_box_easy_afternm(c, m, mlen, n, k);
+}
+
+int
+crypto_box_curve25519xsalsa20poly1305_detached_afternm(unsigned char       *c,
+                                                       unsigned char       *mac,
+                                                       const unsigned char *m,
+                                                       unsigned long long  mlen,
+                                                       const unsigned char *n,
+                                                       const unsigned char *k) {
+    return crypto_box_detached_afternm(c, mac, m, mlen, n, k);
+}
+
+int
+crypto_box_curve25519xsalsa20poly1305_open_detached_afternm(unsigned char       *m,
+                                                            const unsigned char *c,
+                                                            const unsigned char *mac,
+                                                            unsigned long long  clen,
+                                                            const unsigned char *n,
+                                                            const unsigned char *k) {
+    return crypto_box_open_detached_afternm(m, c, mac, clen, n, k);
+}
+
+
+int
+crypto_box_curve25519xsalsa20poly1305_seal(unsigned char       *c,
+                                           const unsigned char *m,
+                                           unsigned long long  mlen,
+                                           const unsigned char *pk) {
+    return crypto_box_seal(c, m, mlen, pk);
+}
+
+int
+crypto_box_curve25519xsalsa20poly1305_seal_open(unsigned char       *m,
+                                                const unsigned char *c,
+                                                unsigned long long  clen,
+                                                const unsigned char *pk,
+                                                const unsigned char *sk) {
+    return crypto_box_seal_open(m, c, clen, pk, sk);
 }
 
 int
@@ -731,6 +874,282 @@ SALTY_FUNC(auth_hmacsha512256_final_verify, 2) DO
 END_OK;
 
 /**
+ * BOX curve25519xchacha20poly1305
+ */
+SALTY_CONST_INT64(box_curve25519xchacha20poly1305_SEEDBYTES);
+SALTY_CONST_INT64(box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+SALTY_CONST_INT64(box_curve25519xchacha20poly1305_SECRETKEYBYTES);
+SALTY_CONST_INT64(box_curve25519xchacha20poly1305_BEFORENMBYTES);
+SALTY_CONST_INT64(box_curve25519xchacha20poly1305_NONCEBYTES);
+SALTY_CONST_INT64(box_curve25519xchacha20poly1305_MACBYTES);
+SALTY_CONST_INT64(box_curve25519xchacha20poly1305_SEALBYTES);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_seed_keypair, 1) DO
+    SALTY_INPUT_BIN(0, seed, crypto_box_curve25519xchacha20poly1305_SEEDBYTES);
+
+    SALTY_OUTPUT_BIN(pk, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    SALTY_OUTPUT_BIN(sk, crypto_box_curve25519xchacha20poly1305_SECRETKEYBYTES);
+
+    SALTY_CALL2(crypto_box_curve25519xchacha20poly1305_seed_keypair(
+                pk.data, sk.data, seed.data), pk, sk);
+END_OK_WITH2(pk, sk);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_keypair, 0) DO
+    SALTY_OUTPUT_BIN(pk, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    SALTY_OUTPUT_BIN(sk, crypto_box_curve25519xchacha20poly1305_SECRETKEYBYTES);
+
+    SALTY_CALL2(crypto_box_curve25519xchacha20poly1305_keypair(
+                pk.data, sk.data), pk, sk);
+END_OK_WITH2(pk, sk);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_easy, 4) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_box_curve25519xchacha20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(2, pk, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(3, sk, crypto_box_curve25519xchacha20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, crypto_box_curve25519xchacha20poly1305_MACBYTES + msg.size);
+
+    SALTY_CALL(crypto_box_curve25519xchacha20poly1305_easy(cipher.data,
+                msg.data, msg.size, nonce.data, pk.data, sk.data), cipher);
+END_OK_WITH(cipher);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_detached, 4) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_box_curve25519xchacha20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(2, pk, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(3, sk, crypto_box_curve25519xchacha20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, msg.size);
+    SALTY_OUTPUT_BIN(mac, crypto_box_curve25519xchacha20poly1305_MACBYTES);
+
+    SALTY_CALL2(crypto_box_curve25519xchacha20poly1305_detached(cipher.data,
+                mac.data, msg.data, msg.size, nonce.data, pk.data, sk.data),
+            cipher, mac);
+END_OK_WITH2(cipher, mac);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_open_detached, 5) DO
+    SALTY_INPUT_BIN(0, cipher, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, mac, crypto_box_curve25519xchacha20poly1305_MACBYTES);
+    SALTY_INPUT_BIN(2, nonce, crypto_box_curve25519xchacha20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(3, pk, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(4, sk, crypto_box_curve25519xchacha20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(msg, cipher.size);
+
+    SALTY_CALL_WITHERR(crypto_box_curve25519xchacha20poly1305_open_detached(
+                msg.data, cipher.data, mac.data, cipher.size, nonce.data, pk.data, sk.data),
+            atom_error_forged, msg);
+END_OK_WITH(msg);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_beforenm, 2) DO
+    SALTY_INPUT_BIN(1, pk, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(2, sk, crypto_box_curve25519xchacha20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(k, crypto_box_curve25519xchacha20poly1305_BEFORENMBYTES);
+
+    SALTY_CALL(crypto_box_curve25519xchacha20poly1305_beforenm(
+                k.data, pk.data, sk.data), k);
+END_OK_WITH(k);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_easy_afternm, 3) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_box_curve25519xchacha20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(2, k, crypto_box_curve25519xchacha20poly1305_BEFORENMBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, crypto_box_curve25519xchacha20poly1305_MACBYTES + msg.size);
+
+    SALTY_CALL(crypto_box_curve25519xchacha20poly1305_easy_afternm(cipher.data,
+                msg.data, msg.size, nonce.data, k.data), cipher);
+END_OK_WITH(cipher);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_detached_afternm, 3) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_box_curve25519xchacha20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(2, k, crypto_box_curve25519xchacha20poly1305_BEFORENMBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, msg.size);
+    SALTY_OUTPUT_BIN(mac, crypto_box_curve25519xchacha20poly1305_MACBYTES);
+
+    SALTY_CALL2(crypto_box_curve25519xchacha20poly1305_detached_afternm(
+                cipher.data, mac.data, msg.data, msg.size, nonce.data, k.data),
+            cipher, mac);
+END_OK_WITH2(cipher, mac);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_open_detached_afternm, 4) DO
+    SALTY_INPUT_BIN(0, cipher, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, mac, crypto_box_curve25519xchacha20poly1305_MACBYTES);
+    SALTY_INPUT_BIN(2, nonce, crypto_box_curve25519xchacha20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(3, k, crypto_box_curve25519xchacha20poly1305_BEFORENMBYTES);
+
+    SALTY_OUTPUT_BIN(msg, cipher.size);
+
+    SALTY_CALL_WITHERR(crypto_box_curve25519xchacha20poly1305_open_detached_afternm(
+                msg.data, cipher.data, mac.data, cipher.size, nonce.data, k.data),
+            atom_error_forged, msg);
+END_OK_WITH(msg);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_seal, 2) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, pk, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, crypto_box_curve25519xchacha20poly1305_SEALBYTES + msg.size);
+
+    SALTY_CALL(crypto_box_curve25519xchacha20poly1305_seal(
+                cipher.data, msg.data, msg.size, pk.data), cipher);
+END_OK_WITH(cipher);
+
+SALTY_FUNC(box_curve25519xchacha20poly1305_seal_open, 3) DO
+    SALTY_INPUT_BIN(0, cipher, crypto_box_curve25519xchacha20poly1305_SEALBYTES);
+    SALTY_INPUT_BIN(1, pk, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(2, sk, crypto_box_curve25519xchacha20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(msg, cipher.size - crypto_box_curve25519xchacha20poly1305_SEALBYTES);
+
+    SALTY_CALL_WITHERR(crypto_box_curve25519xchacha20poly1305_seal_open(
+                msg.data, cipher.data, cipher.size, pk.data, sk.data),
+            atom_error_forged, msg);
+END_OK_WITH(cipher);
+
+/**
+ * BOX curve25519xsalsa20poly1305
+ */
+SALTY_CONST_INT64(box_curve25519xsalsa20poly1305_SEEDBYTES);
+SALTY_CONST_INT64(box_curve25519xsalsa20poly1305_PUBLICKEYBYTES);
+SALTY_CONST_INT64(box_curve25519xsalsa20poly1305_SECRETKEYBYTES);
+SALTY_CONST_INT64(box_curve25519xsalsa20poly1305_BEFORENMBYTES);
+SALTY_CONST_INT64(box_curve25519xsalsa20poly1305_NONCEBYTES);
+SALTY_CONST_INT64(box_curve25519xsalsa20poly1305_MACBYTES);
+SALTY_CONST_INT64(box_curve25519xsalsa20poly1305_SEALBYTES);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_seed_keypair, 1) DO
+    SALTY_INPUT_BIN(0, seed, crypto_box_curve25519xsalsa20poly1305_SEEDBYTES);
+
+    SALTY_OUTPUT_BIN(pk, crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES);
+    SALTY_OUTPUT_BIN(sk, crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES);
+
+    SALTY_CALL2(crypto_box_curve25519xsalsa20poly1305_seed_keypair(
+                pk.data, sk.data, seed.data), pk, sk);
+END_OK_WITH2(pk, sk);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_keypair, 0) DO
+    SALTY_OUTPUT_BIN(pk, crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES);
+    SALTY_OUTPUT_BIN(sk, crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES);
+
+    SALTY_CALL2(crypto_box_curve25519xsalsa20poly1305_keypair(
+                pk.data, sk.data), pk, sk);
+END_OK_WITH2(pk, sk);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_easy, 4) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_box_curve25519xsalsa20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(2, pk, crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(3, sk, crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, crypto_box_curve25519xsalsa20poly1305_MACBYTES + msg.size);
+
+    SALTY_CALL(crypto_box_curve25519xsalsa20poly1305_easy(cipher.data,
+                msg.data, msg.size, nonce.data, pk.data, sk.data), cipher);
+END_OK_WITH(cipher);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_detached, 4) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_box_curve25519xsalsa20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(2, pk, crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(3, sk, crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, msg.size);
+    SALTY_OUTPUT_BIN(mac, crypto_box_curve25519xsalsa20poly1305_MACBYTES);
+
+    SALTY_CALL2(crypto_box_curve25519xsalsa20poly1305_detached(cipher.data,
+                mac.data, msg.data, msg.size, nonce.data, pk.data, sk.data),
+            cipher, mac);
+END_OK_WITH2(cipher, mac);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_open_detached, 5) DO
+    SALTY_INPUT_BIN(0, cipher, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, mac, crypto_box_curve25519xsalsa20poly1305_MACBYTES);
+    SALTY_INPUT_BIN(2, nonce, crypto_box_curve25519xsalsa20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(3, pk, crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(4, sk, crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(msg, cipher.size);
+
+    SALTY_CALL_WITHERR(crypto_box_curve25519xsalsa20poly1305_open_detached(
+                msg.data, cipher.data, mac.data, cipher.size, nonce.data, pk.data, sk.data),
+            atom_error_forged, msg);
+END_OK_WITH(msg);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_beforenm, 2) DO
+    SALTY_INPUT_BIN(1, pk, crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(2, sk, crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(k, crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES);
+
+    SALTY_CALL(crypto_box_curve25519xsalsa20poly1305_beforenm(
+                k.data, pk.data, sk.data), k);
+END_OK_WITH(k);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_easy_afternm, 3) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_box_curve25519xsalsa20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(2, k, crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, crypto_box_curve25519xsalsa20poly1305_MACBYTES + msg.size);
+
+    SALTY_CALL(crypto_box_curve25519xsalsa20poly1305_easy_afternm(cipher.data,
+                msg.data, msg.size, nonce.data, k.data), cipher);
+END_OK_WITH(cipher);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_detached_afternm, 3) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_box_curve25519xsalsa20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(2, k, crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, msg.size);
+    SALTY_OUTPUT_BIN(mac, crypto_box_curve25519xsalsa20poly1305_MACBYTES);
+
+    SALTY_CALL2(crypto_box_curve25519xsalsa20poly1305_detached_afternm(
+                cipher.data, mac.data, msg.data, msg.size, nonce.data, k.data),
+            cipher, mac);
+END_OK_WITH2(cipher, mac);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_open_detached_afternm, 4) DO
+    SALTY_INPUT_BIN(0, cipher, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, mac, crypto_box_curve25519xsalsa20poly1305_MACBYTES);
+    SALTY_INPUT_BIN(2, nonce, crypto_box_curve25519xsalsa20poly1305_NONCEBYTES);
+    SALTY_INPUT_BIN(3, k, crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES);
+
+    SALTY_OUTPUT_BIN(msg, cipher.size);
+
+    SALTY_CALL_WITHERR(crypto_box_curve25519xsalsa20poly1305_open_detached_afternm(
+                msg.data, cipher.data, mac.data, cipher.size, nonce.data, k.data),
+            atom_error_forged, msg);
+END_OK_WITH(msg);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_seal, 2) DO
+    SALTY_INPUT_BIN(0, msg, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, pk, crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES);
+
+    SALTY_OUTPUT_BIN(cipher, crypto_box_curve25519xsalsa20poly1305_SEALBYTES + msg.size);
+
+    SALTY_CALL(crypto_box_curve25519xsalsa20poly1305_seal(
+                cipher.data, msg.data, msg.size, pk.data), cipher);
+END_OK_WITH(cipher);
+
+SALTY_FUNC(box_curve25519xsalsa20poly1305_seal_open, 3) DO
+    SALTY_INPUT_BIN(0, cipher, crypto_box_curve25519xsalsa20poly1305_SEALBYTES);
+    SALTY_INPUT_BIN(1, pk, crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES);
+    SALTY_INPUT_BIN(2, sk, crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES);
+
+    SALTY_OUTPUT_BIN(msg, cipher.size - crypto_box_curve25519xsalsa20poly1305_SEALBYTES);
+
+    SALTY_CALL_WITHERR(crypto_box_curve25519xsalsa20poly1305_seal_open(
+                msg.data, cipher.data, cipher.size, pk.data, sk.data),
+            atom_error_forged, msg);
+END_OK_WITH(cipher);
+
+/**
  * CORE hchacha20
  */
 SALTY_FUNC(core_hchacha20, 3) DO
@@ -754,10 +1173,6 @@ SALTY_FUNC(core_hsalsa20, 3) DO
 
     SALTY_CALL(crypto_core_hsalsa20(out.data, in.data, key.data, con.data), out);
 END_OK_WITH(out);
-
-/**
- * BOX
- */
 
 /**
  * GENERICHASH Blake2b
@@ -1430,6 +1845,44 @@ salty_exports[] = {
     SALTY_EXPORT_FUNC(auth_hmacsha512256_update, 2),
     SALTY_EXPORT_FUNC(auth_hmacsha512256_final, 1),
     SALTY_EXPORT_FUNC(auth_hmacsha512256_final_verify, 2),
+
+    SALTY_EXPORT_CONS(box_curve25519xchacha20poly1305_SEEDBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xchacha20poly1305_PUBLICKEYBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xchacha20poly1305_SECRETKEYBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xchacha20poly1305_BEFORENMBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xchacha20poly1305_NONCEBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xchacha20poly1305_MACBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xchacha20poly1305_SEALBYTES, 0),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_seed_keypair, 1),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_keypair, 0),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_easy, 4),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_detached, 4),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_open_detached, 5),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_beforenm, 2),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_easy_afternm, 3),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_detached_afternm, 3),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_open_detached_afternm, 4),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_seal, 2),
+    SALTY_EXPORT_FUNC(box_curve25519xchacha20poly1305_seal_open, 3),
+
+    SALTY_EXPORT_CONS(box_curve25519xsalsa20poly1305_SEEDBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xsalsa20poly1305_PUBLICKEYBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xsalsa20poly1305_SECRETKEYBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xsalsa20poly1305_BEFORENMBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xsalsa20poly1305_NONCEBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xsalsa20poly1305_MACBYTES, 0),
+    SALTY_EXPORT_CONS(box_curve25519xsalsa20poly1305_SEALBYTES, 0),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_seed_keypair, 1),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_keypair, 0),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_easy, 4),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_detached, 4),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_open_detached, 5),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_beforenm, 2),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_easy_afternm, 3),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_detached_afternm, 3),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_open_detached_afternm, 4),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_seal, 2),
+    SALTY_EXPORT_FUNC(box_curve25519xsalsa20poly1305_seal_open, 3),
 
     SALTY_EXPORT_FUNC(core_hchacha20, 3),
     SALTY_EXPORT_FUNC(core_hsalsa20, 3),
