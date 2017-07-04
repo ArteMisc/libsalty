@@ -11,7 +11,7 @@ defmodule Salty.Box do
         open_detached(data, mac, nonce, pk, sk)
       end
 
-      def open_afternm(cipher, nonce, k) do
+      def open_easy_afternm(cipher, nonce, k) do
         mac_size = macbytes()
         <<mac::binary-size(mac_size),
           data::binary>> = cipher
@@ -21,7 +21,7 @@ defmodule Salty.Box do
   end
 
   def primitive do
-    Salty.Box.Curve25519salsa20poly1305
+    Salty.Box.Curve25519xsalsa20poly1305
   end
 
   @callback seedbytes() :: non_neg_integer()
