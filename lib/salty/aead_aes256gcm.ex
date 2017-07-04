@@ -1,6 +1,10 @@
 defmodule Salty.Aead.Aes256gcm do
   use Salty.Aead
 
+  def available? do
+    :ok == C.aead_aes256gcm_is_available()
+  end
+
   def keybytes do
     C.aead_aes256gcm_KEYBYTES()
   end
