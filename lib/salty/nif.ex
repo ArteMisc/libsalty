@@ -213,6 +213,46 @@ defmodule Salty.Nif do
   def sign_ed25519ph_final_create(_,_), do: :erlang.exit(:salty_nif_not_loaded)
   def sign_ed25519ph_final_verify(_,_,_), do: :erlang.exit(:salty_nif_not_loaded)
 
+  def stream_chacha20_NONCEBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_chacha20_KEYBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_chacha20(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_chacha20_xor(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_chacha20_xor_ic(_,_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+
+  def stream_chacha20_ietf_NONCEBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_chacha20_ietf_KEYBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_chacha20_ietf(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_chacha20_ietf_xor(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_chacha20_ietf_xor_ic(_,_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+
+  def stream_salsa20_NONCEBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa20_KEYBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa20(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa20_xor(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa20_xor_ic(_,_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+
+  def stream_salsa2012_NONCEBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa2012_KEYBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa2012(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa2012_xor(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+
+  def stream_salsa208_NONCEBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa208_KEYBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa208(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_salsa208_xor(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+
+  def stream_xchacha20_NONCEBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_xchacha20_KEYBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_xchacha20(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_xchacha20_xor(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_xchacha20_xor_ic(_,_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+
+  def stream_xsalsa20_NONCEBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_xsalsa20_KEYBYTES, do: :erlang.exit("salty_nif_not_loaded")
+  def stream_xsalsa20(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_xsalsa20_xor(_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+  def stream_xsalsa20_xor_ic(_,_,_,_), do: :erlang.exit("salty_nif_not_loaded")
+
   def randombytes_SEEDBYTES, do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_random(), do: :erlang.exit(:salty_nif_not_loaded)
   def randombytes_stir(), do: :erlang.exit(:salty_nif_not_loaded)

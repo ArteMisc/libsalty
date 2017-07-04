@@ -1739,6 +1739,262 @@ SALTY_FUNC(sign_ed25519ph_final_verify, 3) DO
 END_OK;
 
 /**
+ * STREAM chacha20
+ */
+SALTY_CONST_INT64(stream_chacha20_KEYBYTES);
+SALTY_CONST_INT64(stream_chacha20_NONCEBYTES);
+
+SALTY_FUNC(stream_chacha20, 3) DO
+    SALTY_INPUT_UINT64(0, clen);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_chacha20_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_chacha20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, clen);
+
+    SALTY_CALL(crypto_stream_chacha20(
+                out.data, clen, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_chacha20_xor, 3) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_chacha20_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_chacha20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_chacha20_xor(
+                out.data, m.data, m.size, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_chacha20_xor_ic, 4) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_chacha20_NONCEBYTES);
+    SALTY_INPUT_UINT64(2, ic);
+    SALTY_INPUT_BIN(3, key, crypto_stream_chacha20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_chacha20_xor_ic(
+                out.data, m.data, m.size, nonce.data, ic, key.data), out);
+END_OK_WITH(out);
+
+/**
+ * STREAM chacha20_ietf
+ */
+SALTY_CONST_INT64(stream_chacha20_ietf_KEYBYTES);
+SALTY_CONST_INT64(stream_chacha20_ietf_NONCEBYTES);
+
+SALTY_FUNC(stream_chacha20_ietf, 3) DO
+    SALTY_INPUT_UINT64(0, clen);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_chacha20_ietf_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_chacha20_ietf_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, clen);
+
+    SALTY_CALL(crypto_stream_chacha20_ietf(
+                out.data, clen, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_chacha20_ietf_xor, 3) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_chacha20_ietf_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_chacha20_ietf_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_chacha20_ietf_xor(
+                out.data, m.data, m.size, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_chacha20_ietf_xor_ic, 4) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_chacha20_ietf_NONCEBYTES);
+    SALTY_INPUT_UINT64(2, ic);
+    SALTY_INPUT_BIN(3, key, crypto_stream_chacha20_ietf_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_chacha20_ietf_xor_ic(out.data, m.data, m.size,
+                nonce.data, ((uint32_t) (ic & 0xffffffff)), key.data), out);
+END_OK_WITH(out);
+
+/**
+ * STREAM salsa20
+ */
+SALTY_CONST_INT64(stream_salsa20_KEYBYTES);
+SALTY_CONST_INT64(stream_salsa20_NONCEBYTES);
+
+SALTY_FUNC(stream_salsa20, 3) DO
+    SALTY_INPUT_UINT64(0, clen);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_salsa20_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_salsa20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, clen);
+
+    SALTY_CALL(crypto_stream_salsa20(
+                out.data, clen, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_salsa20_xor, 3) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_salsa20_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_salsa20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_salsa20_xor(
+                out.data, m.data, m.size, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_salsa20_xor_ic, 4) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_salsa20_NONCEBYTES);
+    SALTY_INPUT_UINT64(2, ic);
+    SALTY_INPUT_BIN(3, key, crypto_stream_salsa20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_salsa20_xor_ic(
+                out.data, m.data, m.size, nonce.data, ic, key.data), out);
+END_OK_WITH(out);
+
+/**
+ * STREAM salsa2012
+ */
+SALTY_CONST_INT64(stream_salsa2012_KEYBYTES);
+SALTY_CONST_INT64(stream_salsa2012_NONCEBYTES);
+
+SALTY_FUNC(stream_salsa2012, 3) DO
+    SALTY_INPUT_UINT64(0, clen);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_salsa2012_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_salsa2012_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, clen);
+
+    SALTY_CALL(crypto_stream_salsa2012(
+                out.data, clen, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_salsa2012_xor, 3) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_salsa2012_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_salsa2012_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_salsa2012_xor(
+                out.data, m.data, m.size, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+/**
+ * STREAM salsa208
+ */
+SALTY_CONST_INT64(stream_salsa208_KEYBYTES);
+SALTY_CONST_INT64(stream_salsa208_NONCEBYTES);
+
+SALTY_FUNC(stream_salsa208, 3) DO
+    SALTY_INPUT_UINT64(0, clen);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_salsa208_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_salsa208_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, clen);
+
+    SALTY_CALL(crypto_stream_salsa208(
+                out.data, clen, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_salsa208_xor, 3) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_salsa208_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_salsa208_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_salsa208_xor(
+                out.data, m.data, m.size, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+/**
+ * STREAM xchacha20
+ */
+SALTY_CONST_INT64(stream_xchacha20_KEYBYTES);
+SALTY_CONST_INT64(stream_xchacha20_NONCEBYTES);
+
+SALTY_FUNC(stream_xchacha20, 3) DO
+    SALTY_INPUT_UINT64(0, clen);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_xchacha20_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_xchacha20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, clen);
+
+    SALTY_CALL(crypto_stream_xchacha20(
+                out.data, clen, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_xchacha20_xor, 3) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_xchacha20_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_xchacha20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_xchacha20_xor(
+                out.data, m.data, m.size, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_xchacha20_xor_ic, 4) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_xchacha20_NONCEBYTES);
+    SALTY_INPUT_UINT64(2, ic);
+    SALTY_INPUT_BIN(3, key, crypto_stream_xchacha20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_xchacha20_xor_ic(
+                out.data, m.data, m.size, nonce.data, ic, key.data), out);
+END_OK_WITH(out);
+
+/**
+ * STREAM xsalsa20
+ */
+SALTY_CONST_INT64(stream_xsalsa20_KEYBYTES);
+SALTY_CONST_INT64(stream_xsalsa20_NONCEBYTES);
+
+SALTY_FUNC(stream_xsalsa20, 3) DO
+    SALTY_INPUT_UINT64(0, clen);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_xsalsa20_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_xsalsa20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, clen);
+
+    SALTY_CALL(crypto_stream_xsalsa20(
+                out.data, clen, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_xsalsa20_xor, 3) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_xsalsa20_NONCEBYTES);
+    SALTY_INPUT_BIN(2, key, crypto_stream_xsalsa20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_xsalsa20_xor(
+                out.data, m.data, m.size, nonce.data, key.data), out);
+END_OK_WITH(out);
+
+SALTY_FUNC(stream_xsalsa20_xor_ic, 4) DO
+    SALTY_INPUT_BIN(0, m, SALTY_BIN_NO_SIZE);
+    SALTY_INPUT_BIN(1, nonce, crypto_stream_xsalsa20_NONCEBYTES);
+    SALTY_INPUT_UINT64(2, ic);
+    SALTY_INPUT_BIN(3, key, crypto_stream_xsalsa20_KEYBYTES);
+
+    SALTY_OUTPUT_BIN(out, m.size);
+
+    SALTY_CALL(crypto_stream_xsalsa20_xor_ic(
+                out.data, m.data, m.size, nonce.data, ic, key.data), out);
+END_OK_WITH(out);
+
+/**
  * RANDOMBYTES
  */
 SALTY_CONST_INT64(randombytes_SEEDBYTES);
@@ -1982,6 +2238,46 @@ salty_exports[] = {
     SALTY_EXPORT_FUNC(sign_ed25519ph_update, 2),
     SALTY_EXPORT_FUNC(sign_ed25519ph_final_create, 2),
     SALTY_EXPORT_FUNC(sign_ed25519ph_final_verify, 3),
+
+    SALTY_EXPORT_CONS(stream_chacha20_NONCEBYTES, 0),
+    SALTY_EXPORT_CONS(stream_chacha20_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(stream_chacha20, 3),
+    SALTY_EXPORT_FUNC(stream_chacha20_xor, 3),
+    SALTY_EXPORT_FUNC(stream_chacha20_xor_ic, 4),
+
+    SALTY_EXPORT_CONS(stream_chacha20_ietf_NONCEBYTES, 0),
+    SALTY_EXPORT_CONS(stream_chacha20_ietf_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(stream_chacha20_ietf, 3),
+    SALTY_EXPORT_FUNC(stream_chacha20_ietf_xor, 3),
+    SALTY_EXPORT_FUNC(stream_chacha20_ietf_xor_ic, 4),
+
+    SALTY_EXPORT_CONS(stream_salsa20_NONCEBYTES, 0),
+    SALTY_EXPORT_CONS(stream_salsa20_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(stream_salsa20, 3),
+    SALTY_EXPORT_FUNC(stream_salsa20_xor, 3),
+    SALTY_EXPORT_FUNC(stream_salsa20_xor_ic, 4),
+
+    SALTY_EXPORT_CONS(stream_salsa2012_NONCEBYTES, 0),
+    SALTY_EXPORT_CONS(stream_salsa2012_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(stream_salsa2012, 3),
+    SALTY_EXPORT_FUNC(stream_salsa2012_xor, 3),
+
+    SALTY_EXPORT_CONS(stream_salsa208_NONCEBYTES, 0),
+    SALTY_EXPORT_CONS(stream_salsa208_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(stream_salsa208, 3),
+    SALTY_EXPORT_FUNC(stream_salsa208_xor, 3),
+
+    SALTY_EXPORT_CONS(stream_xchacha20_NONCEBYTES, 0),
+    SALTY_EXPORT_CONS(stream_xchacha20_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(stream_xchacha20, 3),
+    SALTY_EXPORT_FUNC(stream_xchacha20_xor, 3),
+    SALTY_EXPORT_FUNC(stream_xchacha20_xor_ic, 4),
+
+    SALTY_EXPORT_CONS(stream_xsalsa20_NONCEBYTES, 0),
+    SALTY_EXPORT_CONS(stream_xsalsa20_KEYBYTES, 0),
+    SALTY_EXPORT_FUNC(stream_xsalsa20, 3),
+    SALTY_EXPORT_FUNC(stream_xsalsa20_xor, 3),
+    SALTY_EXPORT_FUNC(stream_xsalsa20_xor_ic, 4),
 
     SALTY_EXPORT_FUNC(randombytes_SEEDBYTES, 0),
     SALTY_EXPORT_FUNC(randombytes_random, 0),
