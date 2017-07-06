@@ -193,10 +193,10 @@ _crypto_box_curve25519xchacha20poly1305_seal_nonce(unsigned char       *nonce,
                                                    const unsigned char *pk2) {
     crypto_generichash_state st;
 
-    crypto_generichash_init(&st, NULL, 0U, crypto_box_NONCEBYTES);
-    crypto_generichash_update(&st, pk1, crypto_box_PUBLICKEYBYTES);
-    crypto_generichash_update(&st, pk2, crypto_box_PUBLICKEYBYTES);
-    crypto_generichash_final(&st, nonce, crypto_box_NONCEBYTES);
+    crypto_generichash_init(&st, NULL, 0U, crypto_box_curve25519xchacha20poly1305_NONCEBYTES);
+    crypto_generichash_update(&st, pk1, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    crypto_generichash_update(&st, pk2, crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES);
+    crypto_generichash_final(&st, nonce, crypto_box_curve25519xchacha20poly1305_NONCEBYTES);
 
     return 0;
 }
