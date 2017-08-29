@@ -6,8 +6,9 @@ defmodule Salty.Aead do
 
       def decrypt(nsec, cipher, ad, npub, key) do
         mac_size = abytes()
-        <<mac::binary-size(mac_size),
-          data::binary>> = cipher
+        data_size = byte_size(cipher) - mac_size
+        <<data::binary-size(data_size),
+          mac::binary-size(mac_size)>> = cipher
         decrypt_detached(nsec, data, mac, ad, npub, key)
       end
 
