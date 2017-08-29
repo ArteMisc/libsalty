@@ -6,9 +6,14 @@ ERL_L :=$(shell erl -eval 'io:format("~s~n", [lists:concat([code:lib_dir(erl_int
 ARCH :=$(shell erl -eval 'io:format("~s~n", [lists:concat([erlang:system_info(system_architecture)])])' -s init stop -noshell)
 
 LIBSODIUM_I = -Wall -Werror -I/usr/local/include/sodium
-CFLAGS = -c -g -Wall -fPIC 
+CFLAGS = -c -g -Wall -fPIC
 ERLANG_IFLAGS=-I$(ERTS_I) -I$(ERL_I)
-ERLANG_LFLAGS =  -shared -L"$(ERL_L)" -lerl_interface -lei -L/usr/local/lib -Wl,-R/usr/local/lib -lsodium  
+
+ifeq ($(shell uname -s),Darwin)
+	ERLANG_LFLAGS =  -shared -L"$(ERL_L)" -lerl_interface -lei -L/usr/local/lib -Wl,-rpath /usr/local/lib -flat_namespace -undefined suppress -lsodium
+else
+	ERLANG_LFLAGS =  -shared -L"$(ERL_L)" -lerl_interface -lei -L/usr/local/lib -Wl,-R/usr/local/lib -lsodium
+endif
 
 CC?=clang
 EBIN_DIR=ebin
