@@ -1147,7 +1147,7 @@ SALTY_FUNC(box_curve25519xsalsa20poly1305_seal_open, 3) DO
     SALTY_CALL_WITHERR(crypto_box_curve25519xsalsa20poly1305_seal_open(
                 msg.data, cipher.data, cipher.size, pk.data, sk.data),
             atom_error_forged, msg);
-END_OK_WITH(cipher);
+END_OK_WITH(msg);
 
 /**
  * CORE hchacha20
