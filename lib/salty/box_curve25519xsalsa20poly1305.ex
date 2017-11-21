@@ -62,7 +62,7 @@ defmodule Salty.Box.Curve25519xsalsa20poly1305 do
   end
 
   def seal(msg, pk) do
-    C.box_curve25519xchacha20poly1305_seal(msg, pk)
+    C.box_curve25519xsalsa20poly1305_seal(msg, pk)
   end
 
   def seal_open(cipher, pk, sk) do
