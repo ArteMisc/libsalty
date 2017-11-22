@@ -25,7 +25,7 @@ defmodule Salty.Mixfile do
   end
 
   defp aliases do
-    [compile: ["compile", &make/1]]
+    [compile: [&make/1, "compile"]]
   end
 
   defp deps do
