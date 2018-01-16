@@ -1,12 +1,13 @@
 defmodule Salty.Nif do
   @moduledoc false
+  @compile {:autoload, false}
 
   @doc """
   load_nif is called when Salty.Application is started. It loads the libary and
   binds the Elixir module methods to erl_nif calls.
   """
   def load_nif do
-    path = :filename.join([:code.priv_dir(:salty), :erlang.system_info(:system_architecture), "salty_nif"])
+    path = :filename.join([:code.priv_dir(:salty), "salty_nif"])
     case :erlang.load_nif(path, 0) do
       :ok -> :ok
       error -> {:error, error}

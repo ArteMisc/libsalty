@@ -1,32 +1,40 @@
-# get information about the compilation environment
-# TODO enable cross compilation
-ERTS_I :=$(shell erl -eval 'io:format("~s~n", [lists:concat([code:root_dir(), "/erts-", erlang:system_info(version), "/include"])])' -s init stop -noshell)
-ERL_I :=$(shell erl -eval 'io:format("~s~n", [lists:concat([code:lib_dir(erl_interface), "/include"])])' -s init stop -noshell)
-ERL_L :=$(shell erl -eval 'io:format("~s~n", [lists:concat([code:lib_dir(erl_interface), "/lib"])])' -s init stop -noshell)
-ARCH :=$(shell erl -eval 'io:format("~s~n", [lists:concat([erlang:system_info(system_architecture)])])' -s init stop -noshell)
-
-LIBSODIUM_I = -Wall -Werror -I/usr/local/include/sodium
-CFLAGS = -c -g -Wall -fPIC
-ERLANG_IFLAGS=-I$(ERTS_I) -I$(ERL_I)
-
-ifeq ($(shell uname -s),Darwin)
-	ERLANG_LFLAGS =  -shared -L"$(ERL_L)" -lerl_interface -lei -L/usr/local/lib -Wl,-rpath /usr/local/lib -flat_namespace -undefined suppress -lsodium
-else
-	ERLANG_LFLAGS =  -shared -L"$(ERL_L)" -lerl_interface -lei -L/usr/local/lib -Wl,-R/usr/local/lib -lsodium
+ifeq ($(ERL_EI_INCLUDE_DIR),)
+ERL_ROOT_DIR = $(shell erl -eval "io:format(\"~s~n\", [code:root_dir()])" -s init stop -noshell)
+ifeq ($(ERL_ROOT_DIR),)
+   $(error Could not find the Erlang installation. Check to see that 'erl' is in your PATH)
+endif
+ERL_EI_INCLUDE_DIR = "$(ERL_ROOT_DIR)/usr/include"
+ERL_EI_LIBDIR = "$(ERL_ROOT_DIR)/usr/lib"
 endif
 
-CC?=clang
-EBIN_DIR=ebin
+# Set Erlang-specific compile and linker flags
+ERL_CFLAGS ?= -I$(ERL_EI_INCLUDE_DIR)
+ERL_LDFLAGS ?= -L$(ERL_EI_LIBDIR)
 
-NIF_SRC=\
-		src/salty_nif.c
+CFLAGS ?= -O2 -Wall -Wextra
+LDFLAGS += -fPIC -shared -lsodium -lei
 
-all:
-	mkdir -p priv/$(ARCH) &&\
-		$(CC) $(CFLAGS) $(DRV_CFLAGS) $(ERLANG_IFLAGS) $(LIBSODIUM_I) src/salty_nif.c -o src/salty_nif.o # 2>&1 >/dev/null
-	$(CC) src/salty_nif.o $(ERLANG_LFLAGS) -o priv/$(ARCH)/salty_nif.so
-	mkdir -p  ./_build/dev/lib/salty/priv/$(ARCH)/
-	cp ./priv/$(ARCH)/salty_nif.so ./_build/dev/lib/salty/priv/$(ARCH)/
+ifeq ($(CROSSCOMPILE),)
+CFLAGS += -I/usr/local/include/sodium
+LDFLAGS += -L/usr/local/lib
+
+ifeq ($(shell uname),Darwin)
+LDFLAGS += -Wl,-rpath /usr/local/lib -flat_namespace -undefined suppress
+else
+LDFLAGS += -Wl,-R/usr/local/lib
+endif
+endif
+
+SRC=src/salty_nif.c
+NIF=priv/salty_nif.so
+
+all: priv $(NIF)
+
+priv:
+	mkdir -p priv
+
+$(NIF): $(SRC)
+	$(CC) -o $@ $< $(ERL_CFLAGS) $(CFLAGS) $(ERL_LDFLAGS) $(LDFLAGS)
 
 clean:
-	find . -name "*.o" -type f -delete
+	$(RM) $(NIF)

@@ -10,7 +10,8 @@ defmodule Salty.Mixfile do
       elixir: "~> 1.4",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      aliases: aliases(),
+      compilers: [:elixir_make] ++ Mix.compilers(),
+      make_clean: ["clean"],
       description: description(),
       package: package(),
       deps: deps(),
@@ -24,20 +25,11 @@ defmodule Salty.Mixfile do
     [mod: {Salty.Application, []}]
   end
 
-  defp aliases do
-    [compile: [&make/1, "compile"]]
-  end
-
   defp deps do
-    [{:ex_doc, "~> 0.14", only: :dev}]
-  end
-
-  defp make(_) do
-    IO.puts "compiling salty_nif bindings"
-    unless Mix.shell.cmd("make") === 0 do
-      raise Mix.Error, message: "make encountered an error"
-    end
-    IO.puts "compiling salty_nif bindings done"
+    [
+      {:ex_doc, "~> 0.14", only: :dev},
+      {:elixir_make, "~> 0.4", runtime: false}
+    ]
   end
 
   defp description do
