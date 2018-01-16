@@ -15,7 +15,7 @@ defmodule Salty.Mixfile do
       description: description(),
       package: package(),
       deps: deps(),
-      docs: [readme: true, main: "README.md"],
+      docs: [extras: ["README.md"], main: "readme"],
       source_url: @github
     ]
   end
