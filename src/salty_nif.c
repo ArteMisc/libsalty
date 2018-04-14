@@ -417,13 +417,6 @@ ERL_NIF_TERM atom_error_forged;
 ERL_NIF_TERM atom_error_unknown;
 ERL_NIF_TERM tuple_error_unknown;
 
-/*
-TODO is useful to create this through the nif code?
-ERL_NIF_TERM atom_primitive_auth;
-ERL_NIF_TERM atom_primitive_box;
-ERL_NIF_TERM atom_primitive_secretbox;
-ERL_NIF_TERM atom_primitive_sign;*/
-
 /* erl_nif code */
 static int
 salty_onload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info) {
@@ -1652,24 +1645,22 @@ SALTY_CONST_INT64(sign_ed25519_PUBLICKEYBYTES);
 SALTY_CONST_INT64(sign_ed25519_SECRETKEYBYTES);
 
 SALTY_FUNC(sign_ed25519_seed_keypair, 1) DO
-    unsigned char tmp[crypto_sign_ed25519_PUBLICKEYBYTES];
-
     SALTY_INPUT_BIN(0, seed, crypto_sign_ed25519_SEEDBYTES);
 
+    SALTY_OUTPUT_BIN(pk, crypto_sign_ed25519_PUBLICKEYBYTES);
     SALTY_OUTPUT_BIN(sk, crypto_sign_ed25519_SECRETKEYBYTES);
 
-    SALTY_CALL(crypto_sign_ed25519_seed_keypair(
-                tmp, sk.data, seed.data), sk);
-END_OK_WITH(sk);
+    SALTY_CALL2(crypto_sign_ed25519_seed_keypair(
+                pk.data, sk.data, seed.data), pk, sk);
+END_OK_WITH2(pk, sk);
 
 SALTY_FUNC(sign_ed25519_keypair, 0) DO
-    unsigned char tmp[crypto_sign_ed25519_PUBLICKEYBYTES];
-
+    SALTY_OUTPUT_BIN(pk, crypto_sign_ed25519_PUBLICKEYBYTES);
     SALTY_OUTPUT_BIN(sk, crypto_sign_ed25519_SECRETKEYBYTES);
 
-    SALTY_CALL(crypto_sign_ed25519_keypair(
-                tmp, sk.data), sk);
-END_OK_WITH(sk);
+    SALTY_CALL2(crypto_sign_ed25519_keypair(
+                pk.data, sk.data), pk, sk);
+END_OK_WITH2(pk, sk);
 
 SALTY_FUNC(sign_ed25519, 2) DO
     SALTY_INPUT_BIN(0, data, SALTY_BIN_NO_SIZE);

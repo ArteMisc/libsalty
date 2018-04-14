@@ -119,4 +119,15 @@ defmodule SaltyTest do
           |> Multi.final_verify(auth_multi)
   end
 
+  test "issue#9 ed25519_keypair returns triplet" do
+    {:ok, pk, sk} = Salty.Sign.Ed25519.keypair()
+    assert Salty.Sign.Ed25519.sk_to_pk(sk) == pk
+  end
+
+  test "issue#9 ed25519_seed_keypair returns triplet" do
+    {:ok, seed} = Rand.buf(Salty.Sign.Ed25519.seedbytes())
+    {:ok, pk, sk} = Salty.Sign.Ed25519.seed_keypair(seed)
+    assert Salty.Sign.Ed25519.sk_to_pk(sk) == pk
+  end
+
 end
